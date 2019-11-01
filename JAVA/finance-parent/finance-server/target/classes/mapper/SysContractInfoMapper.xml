@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chinasoft.mybatis.dao.SysContractInfoMapper">
+  <resultMap id="BaseResultMap" type="SysContractInfo">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id"/>
+    <result column="number" jdbcType="INTEGER" property="number" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="associated_customers" jdbcType="VARCHAR" property="associatedCustomers" />
+    <result column="type" jdbcType="VARCHAR" property="type" />
+    <result column="money" jdbcType="DOUBLE" property="money" />
+    <result column="create_name" jdbcType="VARCHAR" property="createName" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="back_money" jdbcType="DOUBLE" property="backMoney" />
+    <result column="left_money" jdbcType="DOUBLE" property="leftMoney" />
+    <result column="total_money" jdbcType="DOUBLE" property="totalMoney" />
+  </resultMap>
+
+  <!--初始化列表-->
+  <!--查询所有合同信息-->
+  <select id="selectContractInfo" resultType="SysContractInfo">
+    select
+    a.*,
+    sum(spe.expense) as total_money
+    from
+    (select clcobcl.* ,clcobcl.money-clcobcl.back_money as left_money
+    from
+    (select clcobc.id ,clcobc.number,clcobc.name,clcobc.type,clcobc.money,clcobc.create_name,clcobc.create_time,clcobc.associated_customers,clcobc.contract_no,clcobc.back_money_state,sum(clcobc.back_money) as back_money
+    from
+    (select clco.id ,clco.number,clco.name,clco.type,clco.money,clco.create_name,clco.create_time,clco.associated_customers,
+    bm.contract_no,
+    bm.back_money_state,
+    if(bm.back_money_state = 1,bm.back_money,0) as back_money
+    from
+    (select DISTINCT
+    con.id ,
+    con.number,
+    con.name,
+    con.type,
+    con.money,
+    con.create_name,
+    con.create_time,
+    sc.name AS associated_customers
+    from sys_contract as con
+    LEFT JOIN
+    sys_client as sc
+    on sc.name = con.associated_customers) as clco
+    LEFT JOIN
+    sys_back_money as bm
+    on clco.number = bm.contract_no) as clcobc
+    GROUP BY clcobc.number) as clcobcl) as a
+    LEFT JOIN
+    sys_project_expense AS spe
+    on  a.number = spe.contract_number
+    GROUP BY a.number
+
+    <if test="sysContractInfo.getName()!=''">
+      having a.name LIKE CONCAT('%',#{sysContractInfo.name},'%')
+    </if>
+    <if test="sysContractInfo.getAssociatedCustomers()!=''">
+      OR a.associated_customers LIKE CONCAT('%',#{sysContractInfo.associatedCustomers},'%')
+    </if>
+    <if test="sysContractInfo.getType()!=''">
+      OR a.type = #{sysContractInfo.type}
+    </if>
+    <if test="sysContractInfo.getNumber()!=null">
+      OR a.number LIKE CONCAT('%',#{sysContractInfo.number},'%')
+    </if>
+
+    ORDER BY a.id DESC
+  </select>
+
+
+  <!--得到合同表中最大合同编号-->
+  <select id="getNumber" resultType="java.lang.Integer">
+    select
+    max(number)
+    from sys_contract
+  </select>
+
+  <!--往回款表写数据-->
+  <insert id="addPeriod">
+    <if test="period==1">
+      INSERT INTO sys_back_money (number,contract_no,period,back_money,estimate_time)
+      VALUES (#{number}, #{contractNo},1,#{backMoney},#{estimateTime})
+    </if>
+    <if test="period==2">
+      INSERT INTO sys_back_money (number,contract_no,period,back_money,estimate_time)
+      VALUES (#{number}, #{contractNo},2,#{backMoney},#{estimateTime})
+    </if>
+    <if test="period==3">
+      INSERT INTO sys_back_money (number,contract_no,period,back_money,estimate_time)
+      VALUES (#{number}, #{contractNo},3,#{backMoney},#{estimateTime})
+    </if>
+  </insert>
+
+  <!--从回款表中查询最大回款编号-->
+  <select id="findMaxNo" resultType="java.lang.Integer">
+       select max(number) from sys_back_money
+  </select>
+
+
+  <!-- 查询合同的数量,总金额,已回款,待回款  -->
+<select id="selectSumContract" resultType="SysContractInfo">
+SELECT
+   COUNT(number) AS number,
+    SUM(b.money) AS money,
+    SUM(b.back_money) AS back_money,
+    SUM(b.left_money) AS left_money
+   FROM
+   (SELECT
+   a.*
+    FROM
+    (SELECT clcobcl.* ,clcobcl.money-clcobcl.back_money AS left_money
+    FROM
+    (SELECT clcobc.id ,clcobc.number,clcobc.name,clcobc.type,clcobc.money,clcobc.create_name,clcobc.create_time,clcobc.associated_customers,clcobc.contract_no,clcobc.back_money_state,SUM(clcobc.back_money) AS back_money
+    FROM
+    (SELECT clco.id ,clco.number,clco.name,clco.type,clco.money,clco.create_name,clco.create_time,clco.associated_customers,
+    bm.contract_no,
+    bm.back_money_state,
+    IF(bm.back_money_state = 1,bm.back_money,0) AS back_money
+    FROM
+    (SELECT DISTINCT
+    con.id ,
+    con.number,
+    con.name,
+    con.type,
+    con.money,
+    con.create_name,
+    con.create_time,
+    sc.name AS associated_customers
+    FROM sys_contract AS con
+    LEFT JOIN
+    sys_client AS sc
+    ON sc.name = con.associated_customers) AS clco
+    LEFT JOIN
+    sys_back_money AS bm
+    ON clco.number = bm.contract_no) AS clcobc
+    GROUP BY clcobc.number) AS clcobcl) AS a
+    LEFT JOIN
+    sys_project_expense AS spe
+    ON  a.number = spe.contract_number
+    GROUP BY a.number) AS b
+
+</select>
+</mapper>

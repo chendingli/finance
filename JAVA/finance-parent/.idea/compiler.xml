@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="finance-app" />
+        <module name="finance-oms" />
+        <module name="finance-server" />
+        <module name="finance-util" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="finance-app" target="1.8" />
+      <module name="finance-oms" target="1.8" />
+      <module name="finance-parent" target="1.8" />
+      <module name="finance-server" target="1.8" />
+      <module name="finance-util" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

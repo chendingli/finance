@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理系统</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv=“X-UA-Compatible” content=“chrome=1″ />
+    <link rel="shortcut icon" href="../images/bitbug_favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="../css/font.css">
+    <link rel="stylesheet" href="../css/xadmin.css">
+    <script type="text/javascript" src="../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../js/xadmin.js"></script>
+    <script type="text/javascript" src="../js/common.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="../js/html5.min.js"></script>
+    <script type="text/javascript" src="../js/respond.min.js"></script>
+    <![endif]-->
+    <style>
+        .login {
+            margin: 230px auto 0 auto;
+            min-height: 350px;
+            max-width: 500px;
+            padding: 40px;
+            background-color: #ffffff;
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 4px;
+            /* overflow-x: hidden; */
+            box-sizing: border-box;
+        }
+
+        .login .message {
+            position: relative;
+            color: rgb(255, 255, 255);
+            font-size: 16px;
+            margin: 10px 0px 0px -58px;
+            padding: 18px 10px 18px 60px;
+            background: rgb(54, 169, 235);
+        }
+    </style>
+</head>
+
+<body class="login-bg">
+
+<div class="login">
+    <div class="message">后台管理系统--登录</div>
+    <div id="darkbannerwrap"></div>
+
+    <form method="post" class="layui-form">
+        <input name="account" placeholder="帐号" type="text" lay-verify="required|username" class="layui-input">
+        <hr class="hr15">
+        <input name="password" lay-verify="required|password" placeholder="密码" type="password" class="layui-input">
+        <hr class="hr15">
+        <input value="登录" lay-submit lay-filter="login" style="width:100%;background: rgb(54, 169, 235);" type="submit">
+        <hr class="hr20">
+    </form>
+</div>
+<script>
+    $(function () {
+        var login = {
+            Commonmethod: Commonmethod(),
+            ngmbaseurl: Commonmethod().baseUrl().baseurl,
+            init: function () {
+                var _this = this;
+
+                this.event();
+            },
+            event: function () {
+                var _this = this;
+                // 表单校验
+                layui.use('form', function () {
+                    var form = layui.form;
+                    form.verify({
+                        username: function (value, item) {
+                            if (!new RegExp("^[a-zA-Z0-9_\u4e00-\u9fa5\\s·]+$").test(value)) {
+                                return '用户名不能有特殊字符';
+                            }
+                            if (/(^\_)|(\__)|(\_+$)/.test(value)) {
+                                return '用户名首尾不能出现下划线\'_\'';
+                            }
+                            if (/^\d+\d+\d$/.test(value)) {
+                                return '用户名不能全为数字';
+                            }
+                        }
+                    });
+                    // 表单提交
+                    form.on('submit(login)', function (data) {
+                        var userparam = JSON.stringify(data.field);
+                        /*_this.Commonmethod.commonajax(
+                            _this.ngmbaseurl + '/api/crowCompany/companyAccount/loginToken',
+                            userparam,
+                            {
+                                headers: {
+                                    "Content-Type": "application/json"
+                                }
+                            },
+                            function (res) {
+                                console.log(res);
+                                if (res.resultCode == '200') {
+                                    layer.msg(res.resultMsg);
+                                    setTimeout(function () {
+                                        var userlist = JSON.stringify(res.data);
+                                        sessionStorage.setItem("accessToken",res.accessToken);
+                                        sessionStorage.setItem("userlist", userlist);
+                                        sessionStorage.setItem("findroleId", res.data.roleId);
+                                        sessionStorage.setItem("accountID", res.data.account);
+                                        window.location.href = "./index.html";
+                                    }, 2000)
+
+                                } else {
+                                    layer.msg(res.resultMsg);
+                                }
+
+                            }
+                        );*/
+
+                        // 模拟登录成功的返回数据
+                        var res = {
+                            code : 0,
+                            msg : 'success',
+                            data:{
+                                accessToken:'1234567890',
+                                menuList:[
+                                    {
+                                        icon:'&#xe64f;',
+                                        name:'系统管理',
+                                        href:null,
+                                        menuList:[
+                                            {
+                                                icon:'&#xe64f;',
+                                                name:'用户管理',
+                                                href:'test.html'
+                                            },
+                                            {
+                                                icon:'&#xe64f;',
+                                                name:'角色管理',
+                                                href:'test.html'
+                                            }
+                                        ]
+                                    },{
+                                        icon:'&#xe64f;',
+                                        name:'系统管理',
+                                        href:null,
+                                        menuList:[
+                                            {
+                                                icon:'&#xe64f;',
+                                                name:'用户管理',
+                                                href:'test.html'
+                                            },
+                                            {
+                                                icon:'&#xe64f;',
+                                                name:'角色管理',
+                                                href:'test.html'
+                                            }
+                                        ]
+                                    }
+                                ],
+                                user:{
+                                    id:'123456',
+                                    username:'admin',
+                                    name:'zhangsan',
+                                    phone:'13456780987',
+                                    email:'qwewqe@qq.com'
+                                },
+                                roleList:['admin','common'],
+                                permissionList:['user:view','user:edit','user:add','user:delete']
+                            }
+                        }
+
+                        // 登录成功后 本地存储用户信息
+                        sessionStorage.setItem("accessToken",res.data.accessToken);
+                        sessionStorage.setItem("user", JSON.stringify(res.data.user));
+                        sessionStorage.setItem("menuList", JSON.stringify(res.data.menuList));
+                        sessionStorage.setItem("roleList", JSON.stringify(res.data.roleList));
+                        sessionStorage.setItem("permissionList", JSON.stringify(res.data.permissionList));
+                        window.location.href = "./index.html";
+                        return false;
+                    });
+                });
+            }
+        }
+        login.init();
+    })
+</script>
+</body>
+
+</html>

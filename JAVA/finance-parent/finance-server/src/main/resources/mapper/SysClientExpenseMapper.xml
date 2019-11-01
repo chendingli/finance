@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chinasoft.mybatis.dao.SysClientExpenseMapper">
+  <resultMap id="BaseResultMap" type="SysClientExpense">
+    <id column="id" jdbcType="BIGINT" property="id"/>
+    <result column="client_name" jdbcType="VARCHAR" property="clientName" />
+    <result column="type" jdbcType="INTEGER" property="type" />
+    <result column="expense" jdbcType="DOUBLE" property="expense" />
+    <result column="time" jdbcType="TIMESTAMP" property="time" />
+    <result column="details" jdbcType="VARCHAR" property="details" />
+    <result column="create_name" jdbcType="VARCHAR" property="createName"/>
+  </resultMap>
+
+  <!--根据用户ID查询所有的角色名， id == 1为超级管理员拥有所有角色-->
+  <select id="findClientName" resultType="java.lang.String">
+    SELECT s.name
+    FROM sys_client s
+  </select>
+
+  <insert id="insertClientEx" parameterType="SysClientExpense" >
+    <selectKey keyProperty="id" resultType="Long" order="AFTER">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    INSERT INTO sys_client_expense(client_name,type,expense,time,details,create_name)
+    values(#{clientName},#{type},#{expense},#{time},#{details},#{createName})
+  </insert>
+
+  <select id="selectByClientId" parameterType="java.lang.Long" resultType="SysExpense">
+    select * from
+    sys_expense_way
+    where client_id = #{id}
+  </select>
+
+  <select id="selectSysClientExpense" resultType="SysClientExpense">
+     SELECT * FROM sys_client_expense ORDER BY id DESC
+    </select>
+
+  <select id="seceltClientSum" resultType="java.lang.Integer">
+    SELECT SUM(expense) AS andexpense FROM sys_client_expense
+</select>
+
+</mapper>

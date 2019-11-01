@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chinasoft.mybatis.dao.SysLettersMapper">
+<resultMap id="BaseResultMap" type="SysLetters">
+
+</resultMap>
+
+
+
+  <!-- 查询合同的数量,总金额,已回款,待回款  -->
+<select id="selectSumContract" resultType="SysLetters">
+SELECT
+   COUNT(number) AS number,
+    SUM(b.money) AS smoney,
+    SUM(b.back_money) AS backMoney,
+    SUM(b.left_money) AS leftMoney
+   FROM
+   (SELECT
+   a.*
+    FROM
+    (SELECT clcobcl.* ,clcobcl.money-clcobcl.back_money AS left_money
+    FROM
+    (SELECT clcobc.id ,clcobc.number,clcobc.name,clcobc.type,clcobc.money,clcobc.create_name,clcobc.create_time,clcobc.associated_customers,clcobc.contract_no,clcobc.back_money_state,SUM(clcobc.back_money) AS back_money
+    FROM
+    (SELECT clco.id ,clco.number,clco.name,clco.type,clco.money,clco.create_name,clco.create_time,clco.associated_customers,
+    bm.contract_no,
+    bm.back_money_state,
+    IF(bm.back_money_state = 1,bm.back_money,0) AS back_money
+    FROM
+    (SELECT DISTINCT
+    con.id ,
+    con.number,
+    con.name,
+    con.type,
+    con.money,
+    con.create_name,
+    con.create_time,
+    sc.name AS associated_customers
+    FROM sys_contract AS con
+    LEFT JOIN
+    sys_client AS sc
+    ON sc.name = con.associated_customers) AS clco
+    LEFT JOIN
+    sys_back_money AS bm
+    ON clco.number = bm.contract_no) AS clcobc
+    GROUP BY clcobc.number) AS clcobcl) AS a
+    LEFT JOIN
+    sys_project_expense AS spe
+    ON  a.number = spe.contract_number
+    GROUP BY a.number) AS b
+
+</select>
+
+ <select id="selectSumTack" resultType="SysLetters">
+   SELECT
+   c.ex1 AS adminExpense,
+   c.ex2 AS clientExpense,
+   d.ex3 AS projectExpense
+   FROM(
+      SELECT a.*,b.*
+      FROM (
+        SELECT
+        SUM(expense) AS ex1
+        FROM
+        sys_administration_expense   )
+        AS a
+        CROSS JOIN
+       (SELECT SUM(expense) AS ex2
+        FROM
+        sys_client_expense) AS b
+       WHERE 1=1
+        ) AS c
+         CROSS JOIN (
+         SELECT SUM(expense) AS ex3
+         FROM sys_project_expense ) AS d
+        WHERE 1=1
+ </select>
+
+
+    <select id="selectTotal" resultType="SysLetters">
+    SELECT
+    e.admin_expense + e.client_expense + e.project_expense AS sumTotal
+    FROM (
+    SELECT
+    c.ex1 AS admin_expense,
+    c.ex2 AS client_expense,
+    d.ex3 AS project_expense
+    FROM(
+    SELECT a.*,b.*
+    FROM (
+    SELECT
+    SUM(expense) AS ex1
+    FROM sys_administration_expense   ) AS a
+    CROSS JOIN
+   (SELECT SUM(expense) AS ex2
+   FROM sys_client_expense) AS b
+   WHERE 1=1
+   ) AS c  CROSS JOIN (
+   SELECT SUM(expense) AS ex3
+   FROM sys_project_expense ) AS d
+    WHERE 1=1) AS e
+    </select>
+</mapper>

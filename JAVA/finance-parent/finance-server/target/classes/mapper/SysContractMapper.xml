@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chinasoft.mybatis.dao.SysContractMapper">
+  <resultMap id="BaseResultMap" type="SysContract">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id"/>
+    <result column="number" jdbcType="INTEGER" property="number" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="associated_customers" jdbcType="VARCHAR" property="associatedCustomers" />
+    <result column="type" jdbcType="VARCHAR" property="type" />
+    <result column="money" jdbcType="DOUBLE" property="money" />
+    <result column="create_name" jdbcType="VARCHAR" property="createName" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="back_money" jdbcType="DOUBLE" property="backMoney" />
+    <result column="left_money" jdbcType="DOUBLE" property="leftMoney" />
+    <result column="total_money" jdbcType="DOUBLE" property="totalMoney" />
+  </resultMap>
+
+
+
+</mapper>

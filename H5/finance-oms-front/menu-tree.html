@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理系统</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv=“X-UA-Compatible” content=“chrome=1″ />
+    <link rel="shortcut icon" href="./images/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/common.js"></script>
+    <link rel="stylesheet" href="./lib/zTree_v3/css/zTreeStyle/zTreeStyle.css" type="text/css">
+    <script type="text/javascript" src="./lib/zTree_v3/js/jquery.ztree.core.js"></script>
+    <script type="text/javascript" src="./lib/zTree_v3/js/jquery.ztree.excheck.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="./js/html5.min.js"></script>
+    <script type="text/javascript" src="./js/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+    <ul id="tree" class="ztree"></ul>
+</body>
+<script>
+    $(function(){
+        var tree = {
+            Commonmethod: Commonmethod(),
+            ngmbaseurl: Commonmethod().baseUrl().baseurl,
+            init: function () {
+                var _this = this;
+
+                _this.initTree();
+
+                this.event();
+            },
+            initTree: function() {
+
+                var _this = this;
+
+                // 获取所有的菜单数据
+                _this.Commonmethod.ajax(
+                    _this.ngmbaseurl + '/api/oms/menu/tree',
+                    {type:[1,2]},
+                    {traditional: true},
+                    function (res) {
+
+                        var setting = {
+                            check: {
+                                enable: true,
+                                chkStyle: "radio",  //单选框
+                                radioType: "all"   //对所有节点设置单选
+                            },
+                            data: {
+                                simpleData: {
+                                    enable: true,
+                                    idKey:"id",
+                                    pIdKey:"parentId",
+                                    rootPId:0
+                                }
+                            },
+                            callback: {
+                                onCheck: function(event, treeId, treeNode) {
+                                    var index = parent.layer.getFrameIndex(window.name);
+                                    parent.app.setParentMenu(treeNode);
+                                    parent.layer.close(index);
+                                }
+                            }
+                        };
+
+                        $.fn.zTree.init($("#tree"), setting, res.data);
+                        var treeObj = $.fn.zTree.getZTreeObj("tree");
+                        treeObj.expandAll(true);
+
+                    });
+            },
+            event:function(){
+
+            }
+        }
+        tree.init();
+    });
+
+</script>
+</body>
+
+</html>

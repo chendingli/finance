@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chinasoft.mybatis.dao.SysUserMapper">
+  <resultMap id="BaseResultMap" type="SysUser">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="username" jdbcType="VARCHAR" property="username" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="phone" jdbcType="VARCHAR" property="phone" />
+    <result column="email" jdbcType="VARCHAR" property="email" />
+    <result column="comment" jdbcType="VARCHAR" property="comment" />
+    <result column="admin_flag" jdbcType="INTEGER" property="adminFlag" />
+    <result column="del_flag" jdbcType="INTEGER" property="delFlag" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+
+  <!--根据用户ID查询所有的角色名， id == 1为超级管理员拥有所有角色-->
+  <select id="selectRoleNamesByUserId" resultType="java.lang.String">
+    <if test="adminFlag != 1">
+      SELECT
+      DISTINCT b.name
+      FROM
+      sys_user a,
+      sys_role b,
+      sys_user_role c
+      WHERE
+      a.del_flag = 1
+      AND b.del_flag = 1
+      AND b.name IS NOT NULL
+      AND b.name != ''
+      AND b.del_flag = 1
+      AND a.id = c.user_id
+      AND b.id = c.role_id
+      AND a.id = #{userId}
+    </if>
+    <if test="adminFlag == 1">
+      SELECT
+      DISTINCT b.name
+      FROM
+      sys_role b
+      WHERE
+      b.del_flag = 1
+      AND b.name IS NOT NULL
+      AND b.name != ''
+    </if>
+  </select>
+
+  <!--根据用户ID查询所有的权限  id == 1为超级管理员拥有所有权限-->
+  <select id="selectPermissionsByUserId" resultType="java.lang.String">
+    <if test="adminFlag != 1">
+      SELECT
+      DISTINCT d.permission
+      FROM
+      sys_user a,
+      sys_role b,
+      sys_user_role c,
+      sys_menu d,
+      sys_role_menu e
+      WHERE
+      a.del_flag = 1
+      AND b.del_flag = 1
+      AND d.del_flag = 1
+      AND d.permission IS NOT NULL
+      AND d.permission != ''
+      AND a.id = c.user_id
+      AND b.id = c.role_id
+      AND b.id = e.role_id
+      AND d.id = e.menu_id
+      AND a.id = #{userId}
+    </if>
+    <if test="adminFlag == 1">
+      SELECT
+      DISTINCT d.permission
+      FROM
+      sys_menu d
+      WHERE
+      d.del_flag = 1
+      AND d.permission IS NOT NULL
+      AND d.permission != ''
+    </if>
+  </select>
+
+  <!--根据用户ID查询所有的菜单  id == 1为超级管理员拥有所有菜单-->
+  <select id="selectMenuListByUserId" resultType="SysMenu">
+    <if test="adminFlag != 1">
+      SELECT
+      DISTINCT d.id,
+      d.parent_id AS 'parentId',
+      d.parent_ids AS 'parentIds',
+      d.name,
+      d.sort,
+      d.url,
+      d.permission,
+      d.type,
+      d.icon AS 'ico',
+      d.del_flag AS 'delFlag',
+      d.create_time AS 'createTime',
+      d.update_time AS 'updateTime'
+      FROM
+      sys_user a,
+      sys_role b,
+      sys_user_role c,
+      sys_menu d,
+      sys_role_menu e
+      WHERE
+      a.del_flag = 1
+      AND b.del_flag = 1
+      AND d.del_flag = 1
+      AND a.id = c.user_id
+      AND b.id = c.role_id
+      AND b.id = e.role_id
+      AND d.id = e.menu_id
+      AND d.type = #{type}
+      AND a.id = #{userId}
+      ORDER BY d.sort ASC
+    </if>
+    <if test="adminFlag == 1">
+      SELECT
+      DISTINCT d.id,
+      d.parent_id AS 'parentId',
+      d.parent_ids AS 'parentIds',
+      d.name,
+      d.sort,
+      d.url,
+      d.permission,
+      d.type,
+      d.icon AS 'ico',
+      d.del_flag AS 'delFlag',
+      d.create_time AS 'createTime',
+      d.update_time AS 'updateTime'
+      FROM
+      sys_menu d
+      WHERE
+      d.del_flag = 1
+      AND d.type = #{type}
+      ORDER BY d.sort ASC
+    </if>
+  </select>
+
+  <select id="selectChildrenMenuListByUserId" resultType="SysMenu">
+    <if test="adminFlag != 1">
+      SELECT
+      DISTINCT d.id,
+      d.parent_id AS 'parentId',
+      d.parent_ids AS 'parentIds',
+      d.name,
+      d.sort,
+      d.url,
+      d.permission,
+      d.type,
+      d.icon AS 'ico',
+      d.del_flag AS 'delFlag',
+      d.create_time AS 'createTime',
+      d.update_time AS 'updateTime'
+      FROM
+      sys_user a,
+      sys_role b,
+      sys_user_role c,
+      sys_menu d,
+      sys_role_menu e
+      WHERE
+      a.del_flag = 1
+      AND b.del_flag = 1
+      AND d.del_flag = 1
+      AND a.id = c.user_id
+      AND b.id = c.role_id
+      AND b.id = e.role_id
+      AND d.id = e.menu_id
+      AND d.type = #{type}
+      AND a.id = #{userId}
+      AND d.parent_id = #{parentId}
+      ORDER BY d.sort ASC
+    </if>
+    <if test="adminFlag == 1">
+      SELECT
+      DISTINCT d.id,
+      d.parent_id AS 'parentId',
+      d.parent_ids AS 'parentIds',
+      d.name,
+      d.sort,
+      d.url,
+      d.permission,
+      d.type,
+      d.icon AS 'ico',
+      d.del_flag AS 'delFlag',
+      d.create_time AS 'createTime',
+      d.update_time AS 'updateTime'
+      FROM
+      sys_menu d
+      WHERE
+      d.del_flag = 1
+      AND d.type = #{type}
+      AND d.parent_id = #{parentId}
+      ORDER BY d.sort ASC
+    </if>
+  </select>
+
+  <!-- 查询用户的所有角色 -->
+  <select id="selectRoleByUserId" resultType="SysRole">
+    <if test="adminFlag != 1">
+      SELECT
+      DISTINCT b.*
+      FROM
+      sys_user a,
+      sys_role b,
+      sys_user_role c
+      WHERE
+      a.del_flag = 1
+      AND b.del_flag = 1
+      AND a.id = c.user_id
+      AND b.id = c.role_id
+      AND a.id = #{userId}
+    </if>
+    <if test="adminFlag == 1">
+      SELECT
+      DISTINCT b.*
+      FROM
+      sys_role b
+      WHERE
+      b.del_flag = 1
+    </if>
+  </select>
+
+  <!-- 根据用户和类型查询菜单树 -->
+  <select id="selectMenuTreeList" resultType="SysMenu">
+    <if test="adminFlag != 1">
+      SELECT
+      a.*
+      FROM
+      sys_menu a,
+      sys_user b,
+      sys_role c,
+      sys_user_role d,
+      sys_role_menu e
+      WHERE
+      a.del_flag = 1
+      AND b.del_flag = 1
+      AND c.del_flag =1
+      AND a.id = e.menu_id
+      AND b.id = d.user_id
+      AND c.id = e.role_id
+      AND c.id = d.role_id
+      AND b.id = #{userId}
+      <if test="type != null">
+        AND a.type IN
+        <foreach collection="type" item="v" index="index"
+                 open="(" close=")" separator=",">
+          #{v}
+        </foreach>
+      </if>
+      ORDER BY
+      a.sort ASC , a.id ASC
+    </if>
+    <if test="adminFlag == 1">
+      SELECT
+      a.*
+      FROM
+      sys_menu a
+      WHERE
+      a.del_flag = 1
+      <if test="type != null">
+        AND a.type IN
+        <foreach collection="type" item="v" index="index"
+                 open="(" close=")" separator=",">
+          #{v}
+        </foreach>
+      </if>
+      ORDER BY
+      a.sort ASC , a.id ASC
+    </if>
+  </select>
+
+  <!-- 根据角色ID查询绑定的用户 -->
+  <select id="selectUserByRoleId" resultType="SysUser">
+    SELECT
+    a.*
+    FROM
+    sys_user a,
+    sys_role b,
+    sys_user_role c
+    WHERE
+    a.del_flag = 1
+    AND b.del_flag = 1
+    AND a.id = c.user_id
+    AND b.id = c.role_id
+    AND b.id = #{roleId}
+  </select>
+</mapper>

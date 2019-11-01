@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chinasoft.mybatis.dao.SysAdministrationExpenseMapper">
+
+  <select id="selectSumExpense" resultType="java.lang.Integer">
+    SELECT SUM(expense) FROM sys_administration_expense
+  </select>
+
+  <select id="selectAdministrationExpense" resultType="SysAdministrationExpense">
+    SELECT * FROM sys_administration_expense ORDER BY number DESC
+  </select>
+</mapper>

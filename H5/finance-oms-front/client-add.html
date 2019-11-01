@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理系统</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8"/>
+    <meta http-equiv="Cache-Control" content="no-siteapp"/>
+    <meta http-equiv=“X-UA-Compatible” content=“chrome=1″/>
+    <link rel="shortcut icon" href="./images/favicon.ico" type="image/x-icon"/>
+    <link rel="shortcut icon" href="./images/favicon.ico" type="image/x-icon"/>
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/common.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="./js/html5.min.js"></script>
+    <script type="text/javascript" src="./js/respond.min.js"></script>
+    <![endif]-->
+    <style type="text/css">
+        .cen {
+            position: relative;
+            left: 50%;
+            margin-left: -176px;
+        }
+
+        .my-input {
+            background-color: #f8f8f8;
+            color: #919191;
+        }
+    </style>
+</head>
+
+<body>
+<div class="x-body layui-container">
+    <div class="layui-row">
+        <form class="layui-form cen" id="account-data" action="javascript:;">
+            <div class="layui-form-item">
+                <label for="name" class="layui-form-label">
+                    <!--<span class="x-red">*</span>-->客户姓名
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" id="name" name="name" lay-verify="name" autocomplete="off" class="layui-input"
+                           maxlength="20">
+                </div>
+                <div class="layui-form-mid layui-word-aux">
+                    <span class="x-red">*</span>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label for="phone" class="layui-form-label">
+                    <!--<span class="x-red">*</span>-->联系方式
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" id="phone" name="phone" lay-verify="phone" autocomplete="off" class="layui-input"
+                           maxlength="11">
+                </div>
+                <div class="layui-form-mid layui-word-aux">
+                    <span class="x-red">*</span>
+                </div>
+            </div>
+
+
+            <div class="layui-form-item">
+                <label for="cname" class="layui-form-label">
+                    <!--<span class="x-red">*</span>-->创建人
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" id="cname" readonly name="createName" lay-verify="cname" autocomplete="off"
+                           class="layui-input my-input"
+                           maxlength="20">
+                </div>
+                <!--<div class="layui-form-mid layui-word-aux">
+                    <span class="x-red">*</span>
+                </div>-->
+            </div>
+
+
+            <div class="layui-form-item">
+                <label for="createtime" class="layui-form-label">
+                    <!-- <span class="x-red">*</span>-->创建时间
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" name="createTime" id="createtime"
+                           lay-verify="required|createtime" autocomplete="off">
+                </div>
+                <div class="layui-form-mid layui-word-aux">
+                    <span class="x-red">*</span>
+                </div>
+            </div>
+
+            <div class="layui-form-item" style="display: none;">
+                <label for="submit" class="layui-form-label">
+                </label>
+                <button class="layui-btn" id="submit" lay-filter="add" lay-submit>
+                    提交
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+
+    var ctime = function () {
+        layui.use('laydate', function () {
+            var laydate = layui.laydate;
+
+            //执行一个laydate实例
+            laydate.render({
+                elem: '#createtime', //指定元素
+                value: new Date(),
+                isInitValue: true,
+                done: function (value, date, endDate) {
+                    var changetime = new Date(value).getTime();
+                    var currenttime = new Date().getTime();
+                    if (changetime > currenttime) {
+                        layer.msg('创建时间不能大于当前时间');
+                        date = new Date();
+                        var initTIme = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+                        $('#createtime').val(initTIme);
+                    }
+
+                }
+
+            });
+        });
+    };
+    var app = {
+        Commonmethod: Commonmethod(),
+        baseurl: Commonmethod().baseUrl().baseurl,
+        treeObj: null,
+        form: null,
+        init: function () {
+            var _this = this;
+            var user = JSON.parse(sessionStorage.getItem("user"));
+            $("#cname").val(user.username);
+            this.initForm();
+            this.event();
+            ctime();
+        },
+        initForm: function () {
+            var _this = this;
+
+        },
+        event: function () {
+            var _this = this;
+
+        },
+        submit: function () {
+
+            var _this = this;
+
+            // 绑定表单提交
+            layui.use('form', function () {
+                var form = layui.form;
+                _this.form = form;
+                form.verify({
+                    name: function (value) {
+                        if (value.length <= 0) {
+                            return '姓名不能为空'
+                        } else if (value.length > 20) {
+                            return '姓名长度不能超过20'
+                        }
+                    },
+                    phone: function (value) {
+                        var pattern = /^1[3|4|5|7|8][0-9]\d{8}$/;
+                        if ((!value) || !pattern.test(value)) {
+                            return '联系方式格式不对';
+                        } else if (value.length <= 0) {
+                            return '联系方式不能为空';
+                        }
+                    },
+                });
+                form.on('submit(add)', function (data) {
+                    // 提交表单
+                    _this.Commonmethod.ajax(
+                        Commonmethod().baseUrl().baseurl + '/api/oms/client/add',
+                        data.field,
+                        null,
+                        function (res) {
+                            var index = parent.layer.getFrameIndex(window.name);
+                            layer.msg("新增成功！");
+                            setTimeout(function () {
+                                layer.close(index);
+                                parent.location.reload();
+                            }, 1500);
+                        }
+                    );
+                    return false;
+
+                });
+            });
+            $('#submit').trigger('click'); // 触发表单提交
+        }
+    };
+</script>
+</body>
+
+</html>

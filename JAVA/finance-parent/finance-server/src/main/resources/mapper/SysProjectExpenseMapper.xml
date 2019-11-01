@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chinasoft.mybatis.dao.SysProjectExpenseMapper">
+
+  <!--根据用户ID查询所有的角色名， id == 1为超级管理员拥有所有角色-->
+  <select id="findContractNameByNumber" parameterType="java.lang.Integer" resultType="java.lang.String">
+    SELECT s.name
+    FROM sys_contract s
+    WHERE s.number = #{number}
+  </select>
+
+  <select id="findContract" resultType="java.lang.String">
+    SELECT s.name
+    FROM sys_contract s
+  </select>
+
+  <select id="findNumberByName" resultType="java.lang.Integer">
+    SELECT s.number
+    FROM sys_contract s
+    WHERE s.name = #{name}
+  </select>
+
+  <select id="selectProject" resultType="java.lang.Integer">
+    SELECT SUM(expense) AS andexpense FROM sys_project_expense
+  </select>
+
+  <select id="selectProjectExpense" resultType="SysProjectExpense">
+    SELECT * FROM sys_project_expense ORDER BY id DESC
+  </select>
+</mapper>

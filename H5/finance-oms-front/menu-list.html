@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理系统</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv=“X-UA-Compatible” content=“chrome=1″ />
+    <link rel="shortcut icon" href="./images/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/common.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="./js/html5.min.js"></script>
+    <script type="text/javascript" src="./js/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+    <div class="x-nav">
+        <span class="layui-breadcrumb">
+            <a href="javascript:;">系统管理</a>
+            <a>
+                <cite>菜单管理</cite>
+            </a>
+        </span>
+        <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" href="javascript:location.replace(location.href);" title="刷新">
+            <i class="layui-icon" style="line-height:30px">&#xe669;</i>
+        </a>
+    </div>
+    <div class="x-body">
+        <xblock>
+            <button class="layui-btn layui-btn-danger" id="add">
+                <i class="layui-icon">&#xe61f;</i>新增
+            </button>
+            <span class="x-right total" style="line-height:40px"></span>
+        </xblock>
+        <div id="menu_table" style="padding-top:10px;" lay-filter="menu_table"></div>
+    </div>
+
+    <script>
+        $(function () {
+
+            var menuList = {
+                Commonmethod: Commonmethod(),
+                baseurl: Commonmethod().baseUrl().baseurl,
+                acceccToken: sessionStorage.getItem("accessToken"),
+                init: function () {
+                    var _this = this;
+
+                    // 初次查询
+                    _this.initTable();
+
+                    // 事件绑定
+                    _this.event();
+                },
+
+                // 初始化表格
+                initTable:function(){
+                    var _this = this;
+
+                    // 获取所有的菜单数据
+                    _this.Commonmethod.ajax(
+                        _this.baseurl + '/api/oms/menu/list',
+                        null,
+                        null,
+                        function (res) {
+
+                            if(res.resultCode == '0') {
+
+                                var nodes = res.data.menuList;
+
+                                var layout = [
+                                    { name: '菜单名称', treeNodes: true, headerClass: 'value_col', colClass: 'value_col', style: '' },
+                                    { name: '类型', treeNodes: false, headerClass: 'value_col', colClass: 'value_col', style: '',
+                                        render:function(row){
+                                            if(row.type == 1) {
+                                                return '<span class="layui-btn layui-btn-xs layui-bg-blue">目录</span>'
+                                            }
+                                            else if(row.type == 2) {
+                                                return '<span class="layui-btn layui-btn-xs layui-bg-green">菜单</span>'
+                                            }
+                                            else if(row.type == 3) {
+                                                return '<span class="layui-btn layui-btn-xs layui-bg-orange">按钮</span>'
+                                            }
+                                        }
+                                    },
+                                    { name: '排序', treeNodes: false, headerClass: 'value_col', colClass: 'value_col', style: '',
+                                        render:function(row){
+                                            return row.sort;
+                                        }
+                                    },
+                                    { name: 'URL', treeNodes: false, headerClass: 'value_col', colClass: 'value_col', style: '',
+                                        render:function(row){
+                                            return row.url == null ? '' : row.url;
+                                        }
+                                    },
+                                    { name: '权限', treeNodes: false, headerClass: 'value_col', colClass: 'value_col', style: '',
+                                        render:function(row){
+                                            return row.permission == null ? '' : row.permission;
+                                        }
+                                    },
+                                    { name: '操作', treeNodes: false, headerClass: 'value_col', colClass: 'value_col', style: '',
+                                        render:function(row){
+                                            return '<a title="修改" onclick="updateMenu('+row.id+')" data="'+row.id+'" class="layui-btn layui-btn-xs updateBtn" lay-event="edit">修改</a>'+
+                                                   '<a title="删除" onclick="deleteMenu('+row.id+')" data="'+row.id+'" class="layui-btn layui-btn-danger layui-btn-xs deleteBtn" lay-event="del">删除</a>';
+                                        }
+                                    },
+                                ];
+
+                                layui.use(['form', 'tree', 'layer'], function() {
+                                    var layer = layui.layer, form = layui.form, $ = layui.jquery;
+
+                                    var tree1 = layui.treeGird({
+                                        elem: '#menu_table', //传入元素选择器
+                                        spreadable: true, //设置是否全展开，默认不展开
+                                        checkbox : false,
+                                        nodes: nodes,
+                                        layout: layout
+                                    });
+
+                                });
+                            }
+
+                        }
+                    );
+
+                },
+
+                // 事件绑定
+                event: function () {
+                    var _this = this;
+
+                    // 添加按钮绑定
+                    $("#add").on('click',function() {
+                        layeropen("添加菜单",['550px','95%'],"menu-list","./menu-add.html",["确定","取消"],
+                                {
+                                    yes:function(index){
+                                        // 确定按钮的回调
+                                        var iframe = window['layui-layer-iframe' + index];
+                                        iframe.app.submit(); // 触发提交
+                                    },
+                                    cancel:function(index){
+                                        // 取消按钮的回调
+                                        layer.close(index);
+                                    },
+                                    success:function(index){
+                                        // 子窗口弹出前的回调
+
+                                    }
+                                }
+                        );
+                    })
+                }
+            }
+
+            menuList.init();
+
+        });
+
+        function updateMenu(id) {
+            layeropen("修改菜单",['550px','95%'],"menu-edit","./menu-edit.html",["确定","取消"],
+                    {
+                        yes:function(index){
+                            // 确定按钮的回调
+                            var iframe = window['layui-layer-iframe' + index];
+                            iframe.app.submit(); // 触发提交
+                        },
+                        cancel:function(index){
+                            // 取消按钮的回调
+                            layer.close(index);
+                        },
+                        success:function(layero,index){
+                            // 子窗口弹出前的回调
+
+                            // 获取子页面的iframe
+                            var iframe = window['layui-layer-iframe' + index];
+                            // 向子页面的全局函数child传参
+                            iframe.app.child(id);
+                            iframe.app.init();
+                        }
+                    }
+            );
+        }
+
+        function deleteMenu(id) {
+            layer.confirm('确认要删除吗？', function(index) {
+                Commonmethod().ajax(
+                        Commonmethod().baseUrl().baseurl + '/api/oms/menu/delete',
+                        {"id":id},
+                        null,
+                        function (res) {
+                            location.reload();
+                        }
+                );
+            });
+        }
+
+    </script>
+</body>
+
+</html>

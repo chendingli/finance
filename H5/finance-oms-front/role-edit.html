@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理系统</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv=“X-UA-Compatible” content=“chrome=1″ />
+    <link rel="shortcut icon" href="./images/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/common.js"></script>
+    <link rel="stylesheet" href="./lib/zTree_v3/css/zTreeStyle/zTreeStyle.css" type="text/css">
+    <script type="text/javascript" src="./lib/zTree_v3/js/jquery.ztree.core.js"></script>
+    <script type="text/javascript" src="./lib/zTree_v3/js/jquery.ztree.excheck.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="./js/html5.min.js"></script>
+    <script type="text/javascript" src="./js/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+    <div class="layui-container x-body">
+        <div class="layui-row">
+            <form class="layui-form" id="role-data">
+                <input type="hidden" name="id" id="id">
+                <div class="layui-form-item">
+                    <label for="name" class="layui-form-label">
+                        <span class="x-red">*</span>角色名
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="name" name="name" lay-verify="required|name" autocomplete="off" class="layui-input" maxlength="20">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="description" class="layui-form-label">
+                        <!-- <span class="x-red">*</span>-->角色描述
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="description" name="description" lay-verify="description" autocomplete="off" class="layui-input" maxlength="20">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="description" class="layui-form-label">
+                        <span class="x-red">*</span>分配权限
+                    </label>
+                    <input type="hidden" name="menuIds" id="menuIds" lay-verify="menuIds">
+                    <div id="menuTree" class="ztree layui-input-inline"></div>
+                </div>
+                <div class="layui-col-md12" style="display: none;">
+                    <div class="layui-form-item">
+                        <label for="submit" class="layui-form-label">
+                        </label>
+                        <button class="layui-btn" id="submit" lay-filter="add" lay-submit>
+                            提交
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        var app = {
+            Commonmethod: Commonmethod(),
+            baseurl: Commonmethod().baseUrl().baseurl,
+            treeObj:null,
+            init: function () {
+                var _this = this;
+
+                this.initTree();
+
+                this.initForm();
+
+                this.event();
+            },
+            initForm:function() {
+                var _this = this;
+                _this.Commonmethod.ajax(
+                        _this.baseurl + '/api/oms/role/get',
+                        {"id":$("#id").val()},
+                        null,
+                        function (res) {
+
+                            $("#id").val(res.data.id);
+                            $("#name").val(res.data.name);
+                            $("#description").val(res.data.description);
+
+                            // 选中已有的菜单
+                            var menuArray = [];
+                            res.data.menuList.forEach(function(value,index,array){
+                                menuArray.push(value.id);
+                            });
+
+                            var nodes = _this.treeObj.transformToArray(_this.treeObj.getNodes());
+                            for (var i=0, l=nodes.length; i < l; i++) {
+                                if($.inArray(nodes[i].id,menuArray) >= 0) {
+                                    if(nodes[i].isParent!=true){ // 不是父节点就勾选
+                                        _this.treeObj.checkNode(nodes[i], true, true);
+                                    }
+                                }
+                            }
+
+                        }
+                );
+            },
+            initTree:function() {
+                var _this = this;
+
+                var setting = {
+                    check: {
+                        enable: true
+                    },
+                    data: {
+                        simpleData: {
+                            enable: true,
+                            idKey:"id",
+                            pIdKey:"parentId",
+                            rootPId:0
+                        }
+                    },
+                    edit: {
+                        enable: true
+                    }
+                };
+
+                _this.Commonmethod.ajax(
+                        Commonmethod().baseUrl().baseurl + '/api/oms/menu/tree',
+                        null,
+                        {async:false},
+                        function (res) {
+                            $.fn.zTree.init($("#menuTree"), setting, res.data);
+                            var treeObj = $.fn.zTree.getZTreeObj("menuTree");
+                            treeObj.expandAll(true);
+                            _this.treeObj = treeObj;
+                        }
+                );
+
+            },
+            event:function(){
+                var _this = this;
+
+            },
+            child:function(id) {
+                $("#id").val(id);
+            },
+            submit:function() {
+
+                var _this = this;
+
+                // 获取所有选择的节点
+                var nodes = _this.treeObj.getCheckedNodes(true);
+                var menuIds = new Array();
+                for(var i = 0 ;i < nodes.length; i++) {
+                    menuIds.push(nodes[i].id);
+                }
+                console.log(menuIds);
+                $("#menuIds").val(menuIds.join(','));
+
+                // 绑定表单提交
+                layui.use('form', function () {
+                    var form = layui.form;
+                    form.verify({
+                        name: function (value, item) {
+                            if (!new RegExp("^[a-zA-Z0-9_\u4e00-\u9fa5\\s·]+$").test(value)) {
+                                return '角色名不能有特殊字符';
+                            }
+                        },
+                        description: function (value, item) {
+                            if (value && !new RegExp("^[a-zA-Z0-9_\u4e00-\u9fa5\\s·]+$").test(value)) {
+                                return '角色描述不能有特殊字符';
+                            }
+                        },
+                        menuIds: function (value) {
+                            if(value.length == 0){
+                                return '请为角色至少分配一个权限';
+                            }
+                        }
+                    });
+
+                    form.on('submit(add)', function (data) {
+                        console.log(data.field);
+                        // 提交表单
+                        _this.Commonmethod.ajax(
+                                Commonmethod().baseUrl().baseurl + '/api/oms/role/update',
+                                data.field,
+                                null,
+                                function (res) {
+                                    var index = parent.layer.getFrameIndex(window.name);
+                                    layer.close(index);
+                                    parent.location.reload();
+                                }
+                        );
+                        return false;
+
+                    });
+                });
+
+                $('#submit').trigger('click');
+
+            }
+        };
+    </script>
+</body>
+
+</html>

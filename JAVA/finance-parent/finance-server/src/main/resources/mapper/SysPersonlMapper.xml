@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chinasoft.mybatis.dao.SysPersonlMapper">
+  <resultMap id="BaseResultMap" type="SysPersonl">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="unmber" jdbcType="BIGINT" property="unmberId" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="pay" jdbcType="DOUBLE" property="sal" />
+    <result column="type" jdbcType="VARCHAR" property="type" />
+    <result column="state" jdbcType="VARCHAR" property="state" />
+    <result column="time" jdbcType="TIMESTAMP" property="rtime" />
+    <result column="time_search" jdbcType="TIMESTAMP" property="timeSearch" />
+  </resultMap>
+
+ <!--数据库查询员工编号-->
+  <select id="getUnmberId" resultType="java.lang.Integer">
+    select
+    max(unmber)
+    from sys_personl
+  </select>
+
+
+</mapper>

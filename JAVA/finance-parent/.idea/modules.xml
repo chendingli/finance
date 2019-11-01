@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/finance-app/finance-app.iml" filepath="$PROJECT_DIR$/finance-app/finance-app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/finance-oms/finance-oms.iml" filepath="$PROJECT_DIR$/finance-oms/finance-oms.iml" />
+      <module fileurl="file://$PROJECT_DIR$/finance-parent.iml" filepath="$PROJECT_DIR$/finance-parent.iml" />
+      <module fileurl="file://$PROJECT_DIR$/finance-server/finance-server.iml" filepath="$PROJECT_DIR$/finance-server/finance-server.iml" />
+      <module fileurl="file://$PROJECT_DIR$/finance-util/finance-util.iml" filepath="$PROJECT_DIR$/finance-util/finance-util.iml" />
+    </modules>
+  </component>
+</project>

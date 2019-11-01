@@ -1,0 +1,535 @@
+ <!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理系统</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv=“X-UA-Compatible” content=“chrome=1″ />
+    <link rel="shortcut icon" href="./images/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/common.js"></script>
+    <link rel="stylesheet" href="./lib/zTree_v3/css/zTreeStyle/zTreeStyle.css" type="text/css">
+    <script type="text/javascript" src="./lib/zTree_v3/js/jquery.ztree.core.js"></script>
+    <script type="text/javascript" src="./lib/zTree_v3/js/jquery.ztree.excheck.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="./js/html5.min.js"></script>
+    <script type="text/javascript" src="./js/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+
+<body>
+    <div class="layui-container x-body">
+        <div class="layui-row">
+
+            <form class="layui-form" id="contract-data" style="position: relative;left: 50%;margin-left: -176px">
+                <label  class="layui-form-label" style="font-size: large">
+                    合同信息
+                </label>
+                <div class="layui-form-item">
+                    <label for="number" class="layui-form-label">
+                        合同编号
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="number" id="number"   autocomplete="off" class="layui-input" maxlength="20" readonly style="border: none">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="name" class="layui-form-label">
+                        <span class="x-red">*</span>合同名称
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="name" id="name" placeholder="请输入合同名称" lay-verify="required|name" autocomplete="off" class="layui-input" maxlength="20" >
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="createName" class="layui-form-label">
+                        <span class="x-red">*</span>创建人
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="createName" id="createName"  readonly style="border: none" autocomplete="off" class="layui-input" maxlength="20" >
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="createTime" class="layui-form-label">
+                        <span class="x-red">*</span>创建时间
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="createTime"  id="createTime"   autocomplete="off" class="layui-input " maxlength="20" readonly style="border: none">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label for="customers" class="layui-form-label">
+                        <span class="x-red">*</span>关联客户
+                    </label>
+                    <div class="layui-input-inline">
+                        <select name="customers" id="customers" class="customers" lay-verify="required|customers " lay-filter="customers">
+                            <option value="" selected>请选择</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="type" class="layui-form-label">
+                        <span class="x-red">*</span>合同类型
+                    </label>
+                    <div class="layui-input-inline">
+                        <select name="type" id="type" class="type" lay-verify="required|type " lay-filter="type">
+                            <option value="" selected>请选择</option>
+                            <option value="TM" selected>TM</option>
+                            <option value="FP" selected>FP</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="money" class="layui-form-label">
+                        <span class="x-red">*</span>合同总金额
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="money" id="money" placeholder="请输入金额" lay-verify="money|required " autocomplete="off" class="layui-input" maxlength="20">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="taxPoint" class="layui-form-label">
+                        <span class="x-red">*</span>税点
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="number" min="0" max="100" step="0.1" name="taxPoint" id="taxPoint" placeholder="请输入" lay-verify="taxPoint|required" autocomplete="off" class="layui-input" maxlength="20">
+
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="tax" class="layui-form-label">
+                        <span class="x-red">*</span>税费
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="tax" id="tax"   autocomplete="off" class="layui-input" maxlength="20" readonly style="border: none">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="first" class="layui-form-label">
+                        <span class="x-red">*</span>首期付款比例
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="number" min="0" max="100" step="0.1" name="first" id="first" placeholder="请输入" lay-verify="first|required " autocomplete="off" class="layui-input" maxlength="20">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="iniPaymoney" class="layui-form-label">
+                        <span class="x-red">*</span>首期付款金额
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="iniPaymoney" id="iniPaymoney"   autocomplete="off" class="layui-input" maxlength="20" readonly style="border: none">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="paytimeOne" class="layui-form-label">
+                        <span class="x-red">*</span>回款时间
+                    </label>
+                    <div class="layui-input-inline layui-timeline">
+                        <input type="text" name="paytimeOne" placeholder="yyyy-MM-dd" id="paytimeOne"  lay-verify="required" autocomplete="off" class="layui-input " maxlength="20" >
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="second" class="layui-form-label">
+                        二期付款比例
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="number" min="0" max="100" step="0.1" name="second" id="second" placeholder="请输入" lay-verify="second" autocomplete="off" class="layui-input" maxlength="20">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="secPaymoney" class="layui-form-label">
+                        二期付款金额
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="secPaymoney" id="secPaymoney"   autocomplete="off" class="layui-input" maxlength="20" readonly style="border: none">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="paytimeTwo" class="layui-form-label">
+                        回款时间
+                    </label>
+                    <div class="layui-input-inline ">
+                        <input type="text" name="paytimeTwo" placeholder="yyyy-MM-dd" id="paytimeTwo"  lay-verify="paytimeTwo" autocomplete="off" class="layui-input " maxlength="20">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="third" class="layui-form-label">
+                        尾款付款比例
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="number" min="0" max="100" step="0.1" name="third" id="third" placeholder="请输入" lay-verify="third" autocomplete="off" class="layui-input" maxlength="20">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="thirdPaymoney" class="layui-form-label">
+                        尾款付款金额
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="thirdPaymoney" id="thirdPaymoney"   autocomplete="off" class="layui-input" maxlength="20" readonly style="border: none">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="paytimeThree" class="layui-form-label">
+                        回款时间
+                    </label>
+                    <div class="layui-input-inline " >
+                        <input type="text"  name="paytimeThree" placeholder="yyyy-MM-dd" id="paytimeThree"  lay-verify="paytimeThree" autocomplete="off" class="layui-input " maxlength="20">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label for="file" class="layui-form-label">
+                        上传合同附件
+                    </label>
+                    <div class="layui-input-inline" >
+                        <input type="file" name="file" id="file">
+                        <label  class="layui-form-label" style="width: 250px;color: #737383">
+                            支持扩展名：.rar .zip .doc .docx .pdf .jpg...
+                        </label>
+                        <input type="hidden"  name="fileAddress" id="fileAddress" autocomplete="off" class="layui-input " maxlength="20" readonly style="border: none">
+                        <input type="text"  name="url" id="url" autocomplete="off" class="layui-input " maxlength="20" readonly style="border: none">
+                    </div>
+                </div>
+
+                <label  class="layui-form-label" style="font-size: large">
+                    开票信息
+                </label>
+                <div class="layui-form-item">
+                    <label for="invoice" class="layui-form-label">
+                        <span class="x-red">*</span>发票抬头
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="invoice" id="invoice" placeholder="请输入" lay-verify="required|invoice " autocomplete="off" class="layui-input" maxlength="20">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="taxNumber" class="layui-form-label">
+                        <span class="x-red">*</span>税号
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="taxNumber" id="taxNumber" placeholder="请输入" lay-verify="required|taxNumber " autocomplete="off" class="layui-input" maxlength="20">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="address" class="layui-form-label">
+                        单位地址
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="address" id="address" placeholder="请输入"  autocomplete="off" class="layui-input" maxlength="50">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="phoneNumber" class="layui-form-label">
+                        电话号码
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="phoneNumber" id="phoneNumber" placeholder="请输入"  autocomplete="off" class="layui-input" maxlength="20">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="bank" class="layui-form-label">
+                        开户银行
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="bank" id="bank" placeholder="请输入"  autocomplete="off" class="layui-input" maxlength="30">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="account" class="layui-form-label">
+                        银行账户
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="account" id="account" placeholder="请输入" autocomplete="off" class="layui-input" maxlength="20">
+                    </div>
+                </div>
+                <div class="layui-col-md12" style="display: none;">
+                    <div class="layui-form-item">
+                        <label for="submit" class="layui-form-label">
+                        </label>
+                        <button class="layui-btn" id="submit" lay-filter="add" lay-submit>
+                            提交
+                        </button>
+
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        //固定多个日期
+        layui.use('laydate',function () {
+            $("input[name*='time']").each(function () {
+                layui.laydate.render({
+                    elem:this,
+                });
+            })
+        })
+    </script>
+
+    <script>
+        layui.use('form',function () {
+            $("#money").on('change',function () {
+                var total = $("#money").val();
+                var taxPoint = $("#taxPoint").val();
+                var firstPoint = $("#first").val();
+                var secondPoint = $("#second").val();
+                var thirdPoint = $("#third").val();
+                if(taxPoint!=0&&total!=0){
+                    $("#tax").val(total*taxPoint/100);
+                }else if(total==0){
+                    $("#tax").val("");
+                }
+                if(firstPoint!=0&&total!=0){
+                    $("#iniPaymoney").val(total*firstPoint/100);
+                }else if(total==0){
+                    $("#iniPaymoney").val("");
+                }
+                if(secondPoint!=0&&total!=0){
+                    $("#secPaymoney").val(total*secondPoint/100);
+                }else if(total==0){
+                    $("#secPaymoney").val("");
+                }
+                if(thirdPoint!=0&&total!=0){
+                    $("#thirdPaymoney").val(total*thirdPoint/100);
+                }else if(total==0){
+                    $("#thirdPaymoney").val("");
+                }
+
+            })
+            $("#taxPoint").on('change',function () {
+                var total = $("#money").val();
+                var taxPoint = $("#taxPoint").val();
+                if(0!=total&&taxPoint!=0){
+                    $("#tax").val(total*taxPoint/100);
+                }else if(taxPoint==0){
+                    $("#tax").val("");
+                }
+            })
+            $("#first").on("change",function () {
+                var total = $("#money").val();
+                var first = $("#first").val();
+                if(total!=0&&first!=0){
+                $("#iniPaymoney").val(total*first/100);
+                }else if(first==0){
+                    $("#iniPaymoney").val("");
+                }
+            })
+            $("#second").on("change",function () {
+                var total = $("#money").val();
+                var second = $("#second").val();
+                if(total!=0&&second!=0){
+                    $("#secPaymoney").val(total*second/100);
+                }else if(second==0){
+                    $("#secPaymoney").val("");
+                }
+            })
+            $("#third").on("change",function () {
+                var total = $("#money").val();
+                var three = $("#third").val();
+                if(total!=0&&three!=0){
+                    $("#thirdPaymoney").val(total*three/100);
+                }else if(three==0){
+                    $("#thirdPaymoney").val("");
+                }
+            })
+        })
+
+    </script>
+
+    <script>
+        //创建时间
+        var ctime = function () {
+            var t = new Date();
+            $("#createTime").val(t.getFullYear()+"-"+(t.getMonth()+1)+"-"+t.getDate()+" "+t.getHours()+":"+t.getMinutes()+":"+t.getSeconds());
+        };
+
+        var app = {
+            Commonmethod: Commonmethod(),
+            baseurl: Commonmethod().baseUrl().baseurl,
+            acceccToken: sessionStorage.getItem("accessToken"),
+            treeObj:null,
+            init: function () {
+                var _this = this;
+
+                this.getNumber();
+
+                this.initForm();
+
+                ctime();
+
+                this.upload();
+
+                this.event();
+
+            },
+            //上传合同附件
+            upload:function(){
+                var _this = this;
+                layui.use('upload', function(){
+                    var upload = layui.upload;
+
+                    var uploadInst = upload.render({
+                        elem: '#file' //绑定元素
+                        ,url: _this.baseurl+'/api/oms/contract/upload'
+                        ,accept:'file'
+                        ,auto:true
+                        ,multiple:false,
+                        headers: {
+                            accessToken :_this.acceccToken
+                        }
+                        ,done: function(res){
+                            $("#fileAddress").val(res.path);
+                            $("#url").val(res.url)
+                            layer.msg("上传成功")
+                        }
+                        ,error: function(){
+                            layer.msg("上传失败")
+                        }
+                    });
+                });
+            },
+
+            //新增合同编号按最大编号+1显示
+            getNumber:function(){
+              var _this = this;
+              _this.Commonmethod.ajax(
+                  _this.baseurl+'/api/oms/contract/getNumber',
+                  null,
+                  null,
+                  function (res) {
+                      if (res!=0){
+                          $("#number").val(res.data+1);
+                      }
+                  }
+              )
+            },
+            //查询所有关联客户
+            initForm:function() {
+                var _this = this;
+                _this.Commonmethod.ajax(
+                    _this.baseurl + '/api/oms/clientExpense/clientName',
+                    null,
+                    null,
+                    function (res) {
+                        layui.use('form', function () {
+                            $.each(res.data, function (index, val) {
+                                $("#customers").append('<option value="' + val + '">' + val + '</option>');
+                            });
+                            $("#createName").val(JSON.parse(sessionStorage.getItem("user")).username);
+                            layui.form.render()
+                        })
+                    }
+                );
+
+            },
+
+            event:function(){
+                var _this = this;
+
+            },
+            //提交验证
+            submit:function() {
+                var _this = this;
+
+                layui.use('form', function () {
+                    var form = layui.form;
+
+                    //验证和提交：
+                    form.verify({
+                        money:function (value,index) {
+                        var reg = /^\d+(\.\d+)?$/;
+                        if(!reg.exec(value)){
+                            return '请输入数字';
+                        }
+                    },taxPoint: function (value, item) {
+
+                            if(value==0){
+                                return '税点不能为空';
+                            }else if (value>100||value<=0) {
+                                return '税点超出范围';
+                            }
+                        },first: function (value, item) {
+                            if(value==0){
+                                return '首期比例不能为空'
+                            }else if (value>100||value<0) {
+                                return '回款比例出错';
+                            }
+                        },second: function (value, item) {
+                            var f =$("#first").val()*1;
+                            if($("#first").val()==100&&value!=0){
+                                $("#second").val(0);
+                                $("#secPaymoney").val(0);
+                                $("#paytimeTwo").val(null);
+                                return '回款已结清，二期不必填写'
+                            }else if($("#first").val()!=100&&value==0){
+                                return '二期回款不能为0';
+                            }else if (value>100||value<0||($("#first").val()*1+value*1)>100) {
+                                return '二期回款比例出错';
+                            }
+                        },third: function (value, item) {
+                            if(($("#first").val()==100||($("#first").val()*1+$("#second").val()*1)==100)&&value!=0){
+                                $("#third").val(0);
+                                $("#thirdPaymoney").val(0);
+                                $("#paytimeThree").val(null);
+                                return '回款已结清，三期不必填写';
+                            }else if((($("#first").val()*1+$("#second").val()*1)!=100)&&value==0){
+                                return '三期回款不能为0';
+                            }else if (value>100||value<0||(($("#first").val()*1+$("#second").val()*1+value*1)!=100)) {
+                                return '三期回款比例出错';
+                            }
+                        },paytimeTwo:function (value,item) {
+                            if($("#second").val()!=0&&value==0){
+                                return '时间必填'
+                            }else if($("#second").val()==0&&value!=0){
+                                return '没有二期回款，时间错误'
+                            }
+                        },paytimeThree:function (value,item) {
+                            if($("#third").val()!=0&&value==0){
+                                return '时间必填'
+                            }else if($("#third").val()==0&&value!=0){
+                                return '没有三期回款，时间错误'
+                            }
+                        }
+
+                    });//verify结束
+
+                    form.on('submit(add)', function (data) {
+                        // 提交表单
+                        _this.Commonmethod.ajax(
+                                Commonmethod().baseUrl().baseurl + '/api/oms/contract/add',
+                                data.field,
+                                null
+                                ,function (res) {
+                                    var index = parent.layer.getFrameIndex(window.name);
+                                    layer.close(index);
+                                    parent.location.reload();
+                                }
+                        );
+                        return false;
+                    });//add结束
+
+                });//layui.use('form', function () { 结束
+
+                $('#submit').trigger('click');
+
+            },//submit结束
+
+        };//app结束
+
+        app.init();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理系统</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv=“X-UA-Compatible” content=“chrome=1″ />
+    <link rel="shortcut icon" href="./images/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/common.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="./js/html5.min.js"></script>
+    <script type="text/javascript" src="./js/respond.min.js"></script>
+    <![endif]-->
+    <style>
+        .yuan {
+            color: #000;
+
+        }
+        .x-body{
+            position: relative;
+
+        }
+        .x-body #totalMoneycontainer{
+            position: absolute;
+            bottom:15px;
+            right:-20px;
+            z-index: -1;
+
+        }
+        .x-body #totalMoneycontainer2{
+            position: absolute;
+            bottom:15px;
+            right:150px;
+            z-index: -2;
+
+        }
+        .x-body #totalMoneycontainer3{
+            position: absolute;
+            bottom:15px;
+            right:320px;
+            z-index: -3;
+
+        }
+        #totalMoney,#totalMoney2,#totalMoney3,#conMon,#baMon,#leMon{
+            width: 120px;
+        }
+        .laytable-cell-1-13 {
+            width: 85px !important;
+        }
+    </style>
+</head>
+
+<body>
+<div class="x-nav">
+        <span class="layui-breadcrumb">
+            <a href="javascript:;">财务管理</a>
+            <a>
+                <cite>回款列表</cite>
+            </a>
+        </span>
+    <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" href="javascript:location.replace(location.href);" title="刷新">
+        <i class="layui-icon" style="line-height:30px">&#xe669;</i>
+    </a>
+</div>
+<div class="x-body">
+    <div class="layui-row">
+        <form class="layui-form layui-col-md12 x-so" action="javascript:;">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <select name="invoice-state" id="invoice-state">
+                            <option value="">请选择开票状态</option>
+                            <option value="1">已开票</option>
+                            <option value="0">待开票</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <select name="back-money-state" id="back-money-state">
+                            <option value="">请选择回款状态</option>
+                            <option value="1">已回款</option>
+                            <option value="0">待回款</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <input type="text" placeholder="请输入" name="contractName" id="contractName" class="layui-input"
+                        >
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <a class="layui-btn search" data-type="reload"  id="search">
+                            <i class="layui-icon">&#xe615;</i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <table id="list" lay-filter="list">
+        <div class="layui-form-item" id="totalMoneycontainer">
+            <label for="totalMoney" class="layui-form-label" >合同总金额</label>
+            <div class="layui-input-inline" id="conMon">
+                <input type="text" style="border:none;" name="totalMoney" id="totalMoney" autocomplete="off" readonly class="layui-input" >
+            </div>
+
+        </div>
+        <div class="layui-form-item" id="totalMoneycontainer2">
+            <label for="totalMoney2" class="layui-form-label" >已回款总金额</label>
+            <div class="layui-input-inline" id="baMon">
+                <input type="text" style="border:none;" name="totalMoney2" id="totalMoney2" autocomplete="off" readonly class="layui-input" >
+            </div>
+
+        </div>
+        <div class="layui-form-item" id="totalMoneycontainer3">
+            <label for="totalMoney3" class="layui-form-label" >待付款总金额</label>
+            <div class="layui-input-inline" id="leMon">
+                <input type="text" style="border:none;" name="totalMoney3" id="totalMoney3" autocomplete="off" readonly class="layui-input" >
+            </div>
+
+        </div>
+    </table>
+    <div id="page"></div>
+</div>
+<script type="text/html" id="operation">
+
+    {{#  if(d.invoiceState == 1){ }}
+        <a title="开票" class="layui-btn layui-btn-xs invoice layui-btn-disabled">开票</a>
+    {{#  } else { }}
+        <a title="开票" class="layui-btn layui-btn-xs invoice" lay-event="view">开票</a>
+    {{#  } }}
+
+    {{#  if(d.backMoneyState == 1){ }}
+        <a title="回款" class="layui-btn layui-btn-xs layui-btn-disabled">回款</a>
+    {{#  } else { }}
+        <a title="回款" class="layui-btn layui-btn-xs" lay-event="view2">回款</a>
+    {{#  } }}
+
+</script>
+<script>
+    var app = {
+        Commonmethod: Commonmethod(),
+        baseurl: Commonmethod().baseUrl().baseurl,
+        acceccToken: sessionStorage.getItem("accessToken"),
+        init: function () {
+            var _this = this;
+
+
+
+            // 初次查询
+            _this.initTable();
+
+            // 事件绑定
+            _this.event();
+        },
+
+        // 获取查询条件参数
+        getSearchParam:function(){
+            var _this = this;
+            var invoiceState = $("#invoice-state").val();
+            var backMoneyState = $("#back-money-state").val();
+            var contractName = $("#contractName").val();
+            var data = {
+                'invoiceState':invoiceState,
+                'backMoneyState':backMoneyState,
+                'contractName':contractName
+            };
+            console.log(data);
+            return data;
+        },
+
+        // 初始化表格
+        initTable:function(){
+            var _this = this;
+
+            layui.use('table', function(){
+                var table = layui.table;
+
+                table.render({
+                    elem: '#list',
+                    url: _this.baseurl + '/api/oms/backMoney/list',
+                    where: _this.getSearchParam(), //如果无需传递额外参数，可不加该参数
+                    headers:{"Authorization":_this.acceccToken},
+                    method: 'post', //如果无需自定义HTTP类型，可不加该参数
+                    request: { //用于对分页请求的参数：page、limit重新设定名称
+                        pageName: 'pageNum', //页码的参数名称，默认：page
+                        limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                    },
+                    response: { // 用于对返回的数据格式的自定义
+                        statusName: 'resultCode', //数据状态的字段名称，默认：code
+                        statusCode: 0, //成功的状态码，默认：0
+                        msgName: 'resultMsg', //状态信息的字段名称，默认：msg
+                        countName: 'count', //数据总数的字段名称，默认：count
+                        dataName: 'data' //数据列表的字段名称，默认：data
+                    },
+                    height: 540,
+                    cellMinWidth: 80,
+                    cols: [
+                        [{  field: 'order',
+                            title: '序号',
+                            type:'numbers'
+                        },
+                        {
+                            field: 'number',
+                            title: '回款编号'
+                        }, {
+                            field: 'contractNo',
+                            title: '合同编号',
+                        },{
+                            field: 'contractName',
+                            title: '合同名称'
+                        },{
+                            field: 'contractType',
+                            title: '类型'
+                        },{
+                            field: 'contractMoney',
+                            title: '合同金额(税后)'
+                        },{
+                            field: 'backMoney',
+                            title: '回款金额'
+                        },{
+                            field: 'period',
+                            title: '期数',
+                            templet: function(d) {
+                                if(d.period == 1) {
+                                    return '一期';
+                                } else if(d.period ==2){
+                                    return '二期';
+                                } else{
+                                    return '三期';
+                                }
+                            }
+                        },{
+                            field: 'estimateTime',
+                            title: '预计回款时间'
+                        },{
+                            field: 'invoiceState',
+                            title: '开票',
+                            templet: function(d) {
+                                if(d.invoiceState == 1) {
+                                    return '已开票';
+                                } else{
+                                    return '未开票'
+                                }
+                            }
+                        },{
+                            field: 'invoiceTime',
+                            title: '开票时间'
+                        },{
+                            field: 'backMoneyState',
+                            title: '回款',
+                            templet: function(d) {
+                                if(d.backMoneyState == 1) {
+                                    return '已回款';
+                                } else{
+                                    return '待回款'
+                                }
+                            }
+                        }, {
+                            field: 'backMoneyTime',
+                            title: '回款时间'
+                        },
+                        {
+                            title: '操作',
+                            align: 'center',
+                            toolbar: '#operation',
+
+                            // templet: function(d) {
+                            //     if (d.invoiceState == 1) {
+                            //         $('#invoice').attr('id', 'zsd');
+                            //     }
+                            // }
+                        }]
+                    ],
+                    page: true,
+                    done: function (res) {
+
+                        var totalMoney = 0;
+                        var totalMoney2 = 0;
+                        $.each(res.data, function (i, n) {
+                            totalMoney += n.contractMoney*1.00;
+                            if(n.backMoneyState == 1) {
+                                totalMoney2 += n.backMoney * 1.00;
+                            }
+                        });
+
+                        var totalMoney3 = totalMoney - totalMoney2;
+                        $('#totalMoney').val(totalMoney+"  元");
+                        $('#totalMoney2').val(totalMoney2+"  元");
+                        $('#totalMoney3').val(totalMoney3+"  元");
+                    },
+                });
+2
+
+                // 监听工具栏
+                table.on('tool(list)', function (obj) { // list 为 table 的 lay-filter 属性
+
+                    var data = obj.data; //获得当前行数据
+                    var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+                    var tr = obj.tr; //获得当前行 tr 的DOM对象
+                    if(layEvent === 'view'){
+                        layeropen("开票",['550px','90%'],"back-money-invoice","./back-money-invoice.html",["确定","取消"],
+                            {
+                                yes:function(index){
+                                    // 确定按钮的回调
+                                    var iframe = window['layui-layer-iframe' + index];
+                                    iframe.app.submit(); // 触发提交
+                                },
+                                cancel:function(index){
+                                    // 取消按钮的回调
+                                    layer.close(index);
+                                },
+                                success:function(layero,index){
+                                    // 子窗口弹出前的回调
+
+                                    // 获取子页面的iframe
+                                    var iframe = window['layui-layer-iframe' + index];
+                                    // 向子页面的全局函数child传参
+                                    iframe.app.child(data.number,data.backMoney);
+                                    iframe.app.init();
+                                }
+                            }
+                        );
+                    }
+                    if (layEvent === 'view2') { // 查看详情事件
+                        if(data.invoiceState != 1){
+                            alert("请先开票!")
+                            return false;
+                        }
+                        layer.confirm('确定已收到'+data.contractName+' 二期回款 '+data.backMoney+'元整？', function(index) {
+                            Commonmethod().ajax(
+                                Commonmethod().baseUrl().baseurl + '/api/oms/backMoney/back',
+                                {"number":data.number},
+                                null,
+                                function (res) {
+                                    location.reload();
+                                }
+                            );
+                        });
+                    }
+
+                });
+            });
+        },
+
+        // 事件绑定
+        event: function () {
+            var _this = this;
+
+            // 查询按钮绑定
+            $("#search").on('click',function() {
+                var str = _this.getSearchParam();
+                console.log(str);
+                if((typeof str=='string')&&str.constructor==String) {
+                console.log(str);
+
+                    layer.msg(str,{time:1000});
+                    return;
+                }
+                _this.initTable();
+            });
+
+        }
+    }
+
+    app.init();
+</script>
+</body>
+
+</html>

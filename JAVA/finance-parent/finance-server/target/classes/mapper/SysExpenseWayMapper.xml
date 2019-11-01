@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chinasoft.mybatis.dao.SysExpenseWayMapper">
+  <resultMap id="BaseResultMap" type="SysExpenseWay">
+    <id column="id" jdbcType="BIGINT" property="id"/>
+    <result column="client_id" jdbcType="BIGINT" property="client_id" />
+    <result column="way_type" jdbcType="INTEGER" property="way_type" />
+    <result column="way_expense" jdbcType="DOUBLE" property="way_expense" />
+  </resultMap>
+
+</mapper>

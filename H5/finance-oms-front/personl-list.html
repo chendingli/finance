@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理系统</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8"/>
+    <meta http-equiv="Cache-Control" content="no-siteapp"/>
+    <meta http-equiv=“X-UA-Compatible” content=“chrome=1″/>
+    <link rel="shortcut icon" href="./images/favicon.ico" type="image/x-icon"/>
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/common.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="./js/html5.min.js"></script>
+    <script type="text/javascript" src="./js/respond.min.js"></script>
+    <![endif]-->
+</head>
+<style>
+    .my-edit {
+        border-color: rgba(125, 125, 125, .3) !important;
+        box-shadow: 2px 2px 2px #cdc8c0;
+        background: #fffbfd !important;
+    }
+
+    .layui-inline-inp>.layui-input-inline-inp{
+
+        margin:1%;
+
+    }
+    .layui-inline{
+        max-width:190px;
+    }
+    .layui-input-inline{
+        width:100%!important;
+
+    }
+    .layui-input-inline .layui-input{
+        width:100%!important;
+
+    }
+</style>
+<div>
+<div class="x-nav">
+        <span class="layui-breadcrumb">
+            <a href="javascript:;">人员管理</a>
+            <a>
+                <cite>人员列表</cite>
+            </a>
+        </span>
+</div>
+<div class="x-body">
+
+        <!--href="/api/oms/personl/exportStuInfoExcel"-->
+        <!--<form action="javascript:;" class="layui-form-item">-->
+
+    <div class="layui-row">
+        <form class="layui-form layui-col-md12 x-so" action="javascript:;">
+            <div class="layui-form-item">
+
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <select name="type_select-state" id="state">
+                            <option value="">人员状态</option>
+                            <option value="在职">在职</option>
+                            <option value="离职">离职</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <div class="layui-input-inline" style="width: auto">
+                        <select name="type_select-state" id="type_select">
+                            <option value="">合同类型</option>
+                            <option value="TM（人力外包）">TM（人力外包）</option>
+                            <option value="FP（独立交付）">FP（独立交付）</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <div class="layui-input-inline" style="width: auto">
+                        <input type="text"  placeholder="开始时间" name="ru_time" id="ru_time" lay-verify="startTime" class="layui-input" style="width: auto">
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <div class="layui-input-inline" style="width: auto">
+                        <input type="text"  placeholder="结束时间" name="end_time" id="end_time" lay-verify="endTime" class="layui-input" style="width: auto">
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <div class="layui-input-inline" style="width: auto">
+                        <input type="text" name="name" id = "name" placeholder="工号，姓名查询" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <a class="layui-btn search" data-type="reload"  id="search">
+                            <i class="layui-icon">&#xe615;</i>搜索
+                        </a>
+                    </div>
+                </div>
+
+                <button class="layui-btn layui-btn-primary" lay-submit lay-filter="export"
+                        id="export"  style="float: right;">
+                          <i class="layui-icon">&#xe61f;</i>导出
+                </button>
+
+                <button class="layui-btn layui-btn-danger" lay-submit lay-filter="add" id="add" style="float: right">
+                    <i class="layui-icon">&#xe61f;</i>创建
+                </button>
+
+            </div>
+        </form>
+    </div>
+
+
+        <span class="x-right total" style="line-height:40px"></span>
+
+
+    </xblock>
+</div>
+    <table id="list" lay-filter="list"></table>
+    <div id="page"></div>
+   </div>
+<script type="text/html" id="operation">
+    {{# if(d.adminFlag != 1){ }}
+    <a title="编辑" class="layui-btn layui-btn layui-btn-xs" lay-event="edit" id="edit">编辑</a>
+    {{# } }}
+</script>
+<script>
+
+    var mtime = function () {
+        layui.use('laydate', function(){
+            var laydate = layui.laydate;
+
+            //执行一个laydate实例
+            laydate.render({
+                elem: '#ru_time',
+            });
+            laydate.render({
+                elem: '#end_time',//指定元素,
+            });
+        });
+
+    };
+    mtime();
+
+    var app = {
+        Commonmethod: Commonmethod(),
+        baseurl: Commonmethod().baseUrl().baseurl,
+        acceccToken: sessionStorage.getItem("accessToken"),
+        init: function () {
+            var _this = this;
+
+            // 初次查询
+            _this.initTable();
+
+            // 事件绑定
+            _this.event();
+        },
+
+        // 初始化表格
+        initTable: function () {
+            var _this = this;
+            layui.use('table', function () {
+                var table = layui.table;
+                table.render({
+                    elem: '#list',
+                    url: _this.baseurl + '/api/oms/personl/list',
+                    where: _this.getSearchParam(), //如果无需传递额外参数，可不加该参数
+                    headers: {"Authorization": _this.acceccToken},
+                    method: 'post', //如果无需自定义HTTP类型，可不加该参数
+                    request: { //用于对分页请求的参数：page、limit重新设定名称
+                        pageName: 'pageNum', //页码的参数名称，默认：page
+                        limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                    },
+                    response: { // 用于对返回的数据格式的自定义
+                        statusName: 'resultCode', //数据状态的字段名称，默认：code
+                        statusCode: 0, //成功的状态码，默认：0
+                        msgName: 'resultMsg', //状态信息的字段名称，默认：msg
+                        countName: 'count', //数据总数的字段名称，默认：count
+                        dataName: 'data' //数据列表的字段名称，默认：data
+                    },
+                    height: 540,
+                    cellMinWidth: 80,
+                    cols: [
+                        [{
+                            field: 'id',
+                            title: '序号',
+                            type: 'numbers'
+                        }, {
+                            field: 'unmberId',
+                            title: '员工编号'
+                        }, {
+                            field: 'name',
+                            title: '员工姓名'
+                        },{
+                            field: 'rtime',
+                            title: '入职时间'
+                        }, {
+                            field: 'sal',
+                            title: '工资'
+                        }, {
+                            field: 'state',
+                            title: '员工状态'
+                        }, {
+                            field: 'type',
+                            title: '合同类型'
+                        }, {
+                            title: '操作',
+                            align: 'center',
+                            toolbar: '#operation'
+                        }]
+                    ],
+                    page: true
+                });
+
+                        // 监听工具栏
+                table.on('tool(list)', function (obj) { // list 为 table 的 lay-filter 属性
+
+                    var data = obj.data; //获得当前行数据
+                    var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+
+                    // var colums = "name"+","+"phone"+","+"email"+","+"comment"+",";//可以修改的字段名称
+                    if (layEvent === 'edit') { //编辑事件
+
+                        layeropen("人员修改", ['550px', '90%'], "personl-edit", "./personl-edit.html", ["确定", "取消"],
+                            {
+                                yes: function (index) {
+                        // 确定按钮的回调
+                                    var iframe = window['layui-layer-iframe' + index];
+                                    iframe.app.submit(); // 触发提交
+                                },
+                                cancel: function (index) {
+                        // 取消按钮的回调
+                                    layer.close(index);
+                                },
+                                success: function (layero, index) {
+                        // 子窗口弹出前的回调
+
+                        // 获取子页面的iframe
+                                    var iframe = window['layui-layer-iframe' + index];
+                        // 向子页面的全局函数child传参
+                                    iframe.app.child(data.id);
+                                    iframe.app.init();
+                                }
+                            }
+                        );
+                    }
+                });
+            });
+        },
+        getSearchParam: function () {
+            var name = $("#name").val();
+            var state = $("#state").val();
+            var ru_time = $("#ru_time").val();
+            var end_time = $("#end_time").val();
+            var type = $("#type_select").val();
+
+            var data = {
+                'name': name,
+                'rtime':ru_time,
+                'timeSearch':end_time,
+                'type':type,
+                'state': state
+            };
+            return data;
+        },
+            // 事件绑定
+        event: function () {
+            var _this = this;
+
+
+            // 查询按钮绑定
+            $("#search").on('click',function() {
+                _this.initTable();
+            });
+
+            // 添加按钮绑定
+            $("#add").on('click', function () {
+                layeropen("添加人员", ['550px', '90%'], "personl-add", "./personl-add.html", ["确定", "取消"],
+                    {
+                        yes: function (index) {
+            // 确定按钮的回调
+                            var iframe = window['layui-layer-iframe' + index];
+                            iframe.app.submit(); // 触发提交
+                        },
+                        cancel: function (index) {
+            // 取消按钮的回调
+                            layer.close(index);
+                        },
+                        success: function (layero, index) {
+            // 子窗口弹出前的回调
+                            var iframe = window['layui-layer-iframe' + index];
+                            iframe.app.init();
+                        }
+                    }
+                );
+            });
+
+            //表格导出
+            $("#export").on('click',function() {
+                var  activityId = $("#activitiesId").val();
+                window.location.href=Commonmethod().baseUrl().baseurl + '/api/oms/personl/exportStuInfoExcel';
+            })
+        },
+        submit: function () {
+            var _this = this;
+            layui.use('form', function () {
+                var form = layui.form;
+                _this.form = form;
+                form.on('submit(export)', function (data) {
+                    _this.Commonmethod.ajax(
+                        Commonmethod().baseUrl().baseurl + '/api/oms/personl/exportStuInfoExcel',
+                        data.field,
+                        {type:'post'},
+                        function (res) {
+                            console.log(res);
+                            debugger;
+                            setTimeout(function () {
+
+                            }, );
+                        }
+                    );
+                    return false;
+                });
+
+            });
+        }
+    };
+
+    app.init();
+</script>
+</body>
+
+</html>

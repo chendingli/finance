@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理系统</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv=“X-UA-Compatible” content=“chrome=1″ />
+    <link rel="shortcut icon" href="./images/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/common.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="./js/html5.min.js"></script>
+    <script type="text/javascript" src="./js/respond.min.js"></script>
+    <![endif]-->
+</head>
+<style>
+    .my-edit{
+        border-color:rgba(125,125,125,.3)!important;
+        box-shadow: 2px 2px 2px #cdc8c0;
+        background: #fffbfd !important;
+    }
+</style>
+<body>
+    <div class="x-nav">
+        <span class="layui-breadcrumb">
+            <a href="javascript:;">系统管理</a>
+            <a>
+                <cite>用户管理</cite>
+            </a>
+        </span>
+        <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" href="javascript:location.replace(location.href);" title="刷新">
+            <i class="layui-icon" style="line-height:30px">&#xe669;</i>
+        </a>
+    </div>
+    <div class="x-body">
+        <div class="layui-row">
+            <form class="layui-form layui-col-md12 x-so" action="javascript:;">
+                <input type="text" name="username" placeholder="账号，姓名，手机号，邮箱搜索" autocomplete="off" class="layui-input">
+                <a class="layui-btn search" data-type="reload"  id="search">
+                    <i class="layui-icon">&#xe615;</i>
+                </a>
+            </form>
+        </div>
+        <xblock>
+            <button class="layui-btn layui-btn-danger" id="add">
+                <i class="layui-icon">&#xe61f;</i>新增
+            </button>
+            <span class="x-right total" style="line-height:40px"></span>
+        </xblock>
+        <table id="list" lay-filter="list"></table>
+        <div id="page"></div>
+    </div>
+    <script type="text/html" id="operation">
+        {{# if(d.adminFlag != 1){ }}
+        <a title="编辑" class="layui-btn layui-btn-xs" lay-event="edit" id="edit">编辑</a>
+        <a title="保存" class="layui-btn layui-btn-xs" lay-event="save" id="save" style="display: none">保存</a>
+        <a title="取消" class="layui-btn layui-btn-xs" lay-event="cancel" id="cancel" style="display: none">取消</a>
+        <a title="删除" class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+        <a title="重置密码" class="layui-btn layui-btn-danger layui-btn-xs" lay-event="resetPassword">重置密码</a>
+        {{# } }}
+    </script>
+    <script>
+        var app = {
+            Commonmethod: Commonmethod(),
+            baseurl: Commonmethod().baseUrl().baseurl,
+            acceccToken: sessionStorage.getItem("accessToken"),
+            init: function () {
+                var _this = this;
+
+                // 初次查询
+                _this.initTable();
+
+                // 事件绑定
+                _this.event();
+            },
+
+            // 获取查询条件参数
+            getSearchParam:function(){
+                var username = $("input[name='username']").val();
+                var data = {
+                    'username':username
+                };
+                return data;
+            },
+
+            // 初始化表格
+            initTable:function(){
+                var _this = this;
+
+                layui.use('table', function(){
+                    var table = layui.table;
+
+                    table.render({
+                        elem: '#list',
+                        url: _this.baseurl + '/api/oms/user/list',
+                        where: _this.getSearchParam(), //如果无需传递额外参数，可不加该参数
+                        headers:{"Authorization":_this.acceccToken},
+                        method: 'post', //如果无需自定义HTTP类型，可不加该参数
+                        request: { //用于对分页请求的参数：page、limit重新设定名称
+                            pageName: 'pageNum', //页码的参数名称，默认：page
+                            limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                        },
+                        response: { // 用于对返回的数据格式的自定义
+                            statusName: 'resultCode', //数据状态的字段名称，默认：code
+                            statusCode: 0, //成功的状态码，默认：0
+                            msgName: 'resultMsg', //状态信息的字段名称，默认：msg
+                            countName: 'count', //数据总数的字段名称，默认：count
+                            dataName: 'data' //数据列表的字段名称，默认：data
+                        },
+                        height: 540,
+                        cellMinWidth: 80,
+                        cols: [
+                            [{
+                                field: 'username',
+                                title: '账号'
+                            }, {
+                                field: 'name',
+                                title: '姓名'
+                            },  {
+                                field: 'phone',
+                                title: '手机号'
+                            }, {
+                                field: 'email',
+                                title: '邮箱'
+                            },{
+                                field: 'comment',
+                                title: '备注'
+                            }, {
+                                title: '操作',
+                                align: 'center',
+                                toolbar: '#operation'
+                            }]
+                        ],
+                        page: true
+                    });
+
+                    // 监听工具栏
+                    table.on('tool(list)', function (obj) { // list 为 table 的 lay-filter 属性
+                        debugger
+                        var data = obj.data; //获得当前行数据
+                        var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+
+                        var colums = "name"+","+"phone"+","+"email"+","+"comment"+",";//可以修改的字段名称
+
+                        if (layEvent === 'edit') { //编辑事件
+
+                            $("#edit").css("display","none");
+                            $("#save").css("display","");
+                            $("#cancel").css("display","");
+                            var tr = obj.tr; //获得当前行 tr 的DOM对象
+                            $.each($(tr).children(),function(index,item){
+                                if(colums.indexOf(($(item).attr("data-field")+","))!==-1){
+                                    $(item).addClass("my-edit");
+                                    $(item).attr("data-edit","text");
+                                }
+                            });
+
+//                            layeropen("修改用户",['550px','90%'],"account-edit","./account-edit.html",["确定","取消"],
+//                                    {
+//                                        yes:function(index){
+//                                            // 确定按钮的回调
+//                                            var iframe = window['layui-layer-iframe' + index];
+//                                            iframe.app.submit(); // 触发提交
+//                                        },
+//                                        cancel:function(index){
+//                                            // 取消按钮的回调
+//                                            layer.close(index);
+//                                        },
+//                                        success:function(layero,index){
+//                                            // 子窗口弹出前的回调
+//
+//                                            // 获取子页面的iframe
+//                                            var iframe = window['layui-layer-iframe' + index];
+//                                            // 向子页面的全局函数child传参
+//                                            iframe.app.child(data.id);
+//                                            iframe.app.init();
+//                                        }
+//                                    }
+//                            );
+                        } else if(layEvent=='resetPassword'){
+                            Commonmethod().ajax(
+                                Commonmethod().baseUrl().baseurl + '/api/oms/user/resetPassword',
+                                {"id":data.id,"username":data.username},
+                                null,
+                                function(res){
+                                    layer.alert("密码已重置为初始密码，请及时登录修改！",function(){
+                                        location.reload();
+                                    });
+                                }
+                            );
+                        } else if(layEvent=='save'){
+                            Commonmethod().ajax(
+                                Commonmethod().baseUrl().baseurl + '/api/oms/user/update',
+                                //"name"+","+"phone"+","+"email"+","+"comment"
+                                {"id":data.id,"username":data.username,"name":data.name,"phone":data.phone,"email":data.email,"comment":data.comment},
+                                null,
+                                function (res) {
+                                    layer.msg("修改成功！");
+                                    setTimeout(function () {
+                                        location.reload();
+                                    },1500);
+
+                                }
+                            );
+                        } else if(layEvent=='cancel'){
+                            table.reload("list","");
+                        }else if (layEvent === 'del') { // 删除事件
+                            layer.confirm('确认要删除吗？', function(index) {
+                                Commonmethod().ajax(
+                                        Commonmethod().baseUrl().baseurl + '/api/oms/user/delete',
+                                        {"id":data.id},
+                                        null,
+                                        function (res) {
+                                            layer.msg("删除成功!");
+                                            setTimeout(function () {
+                                                location.reload();
+                                            },1500);
+
+                                        }
+                                );
+                            });
+                        }
+                    });
+                });
+            },
+
+            // 事件绑定
+            event: function () {
+                var _this = this;
+
+                // 查询按钮绑定
+                $("#search").on('click',function() {
+                    _this.initTable();
+                });
+
+                // 添加按钮绑定
+                $("#add").on('click',function() {
+                    layeropen("添加帐号",['550px','90%'],"account-add","./account-add.html",["确定","取消"],
+                            {
+                                yes:function(index){
+                                    // 确定按钮的回调
+                                    var iframe = window['layui-layer-iframe' + index];
+                                    iframe.app.submit(); // 触发提交
+                                },
+                                cancel:function(index){
+                                    // 取消按钮的回调
+                                    layer.close(index);
+                                },
+                                success:function(layero,index){
+                                    // 子窗口弹出前的回调
+                                    var iframe = window['layui-layer-iframe' + index];
+                                    iframe.app.init();
+                                }
+                            }
+                    );
+                })
+
+            }
+        }
+
+        app.init();
+    </script>
+</body>
+
+</html>

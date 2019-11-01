@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理系统</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv=“X-UA-Compatible” content=“chrome=1″ />
+    <link rel="shortcut icon" href="./images/favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="./images/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/common.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="./js/html5.min.js"></script>
+    <script type="text/javascript" src="./js/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+<div class="x-body layui-container">
+    <div class="layui-row">
+        <form class="layui-form" id="account-data" action="javascript:;">
+            <div class="layui-form-item">
+                <label for="address" class="layui-form-label">
+                    <span class="x-red">*</span>发票邮寄地址
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" id="address" name="address" lay-verify="required|address" autocomplete="off" class="layui-input" maxlength="20">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-inline">
+                    <input type="hidden" id="number" name="number" lay-verify="required|number" autocomplete="off" class="layui-input" maxlength="20">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label for="backMoney" class="layui-form-label">
+                    开票金额
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" id="backMoney" name="backMoney" lay-verify="backMoney" autocomplete="off" class="layui-input" maxlength="20" readonly>
+                </div>
+            </div>
+            <div class="layui-form-item" style="display: none;">
+                <label for="submit" class="layui-form-label">
+                </label>
+                <button class="layui-btn" id="submit" lay-filter="invoice" lay-submit>
+                    提交
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    var app = {
+        Commonmethod: Commonmethod(),
+        baseurl: Commonmethod().baseUrl().baseurl,
+        treeObj:null,
+        form:null,
+        init: function () {
+            var _this = this;
+            this.initForm();
+            this.event();
+        },
+        initForm:function() {
+            var _this = this;
+            _this.Commonmethod.ajax(
+                Commonmethod().baseUrl().baseurl + '/api/oms/role/listAll',
+                null,
+                null,
+                function (res) {
+                    if(res.data) {
+                        layui.use('form', function () {
+                            var form = layui.form;
+                            res.data.forEach(function(value){
+                                $("#roleCheckBox").append('<input type="checkbox" lay-skin="primary" value="'+value.id+'" title="'+value.name+'">');
+                                // $("#backMoney").val(value.address)
+                            });
+                            form.render();
+                        });
+                    }
+                }
+            );
+        },
+        event:function(){
+            var _this = this;
+
+        },
+        // 父窗口传参
+        child:function(number,backMoney){
+            $("#number").val(number);
+            $("#backMoney").val(backMoney);
+        },
+        // 事件绑定
+
+        submit:function() {
+
+            var _this = this;
+
+            // 绑定表单提交
+            layui.use('form', function () {
+                var form = layui.form;
+                _this.form = form;
+                form.verify({
+                    address: function (value) {
+                        var pattern = $.trim(value);
+                        if ((!value) || (pattern.length > 100)) {
+                            return '地址过长';
+                        } else if (value.indexOf(' ') != -1) {
+                            return '不允许有空格，请修改';
+                        }
+                    },
+                });
+
+                form.on('submit(invoice)', function (data) {
+                    // 提交表单
+                    _this.Commonmethod.ajax(
+                        Commonmethod().baseUrl().baseurl + '/api/oms/backMoney/invoice',
+                        data.field,
+                        null,
+                        function (res) {
+                            var index = parent.layer.getFrameIndex(window.name);
+                            layer.alert("开票成功",function(){
+                                layer.close(index);
+                                parent.location.reload();
+                            });
+                        }
+                    );
+                    return false;
+
+                });
+            });
+
+            $('#submit').trigger('click'); // 触发表单提交
+        }
+    };
+</script>
+</body>
+
+</html>

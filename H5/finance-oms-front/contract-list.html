@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理系统</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv=“X-UA-Compatible” content=“chrome=1″ />
+    <link rel="shortcut icon" href="./images/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/common.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="./js/html5.min.js"></script>
+    <script type="text/javascript" src="./js/respond.min.js"></script>
+    <![endif]-->
+</head>
+<style>
+    .xblockformcontainer .x-right .layui-row form{
+        margin-bottom:0px;
+    }
+    .addclient{
+        line-height:40px;
+        float:left;
+        vertical-align: middle;
+    }
+
+    .project{
+        line-height:40px;
+        float:left;
+        vertical-align: middle;
+    }
+    .yuan {
+        color: #000;
+
+    }
+    .x-body{
+        position: relative;
+
+    }
+    .x-body #totalMoneycontainer{
+        position: absolute;
+        bottom:15px;
+        right:-70px;
+
+    }
+    #totalContractNumber{
+         position: absolute;
+         bottom:15px;
+         right:55px;
+
+     }
+</style>
+<body>
+    <div class="x-nav">
+        <span class="layui-breadcrumb">
+            <a href="javascript:;">合同管理</a>
+            <a>
+                <cite>合同列表</cite>
+            </a>
+        </span>
+        <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" href="javascript:location.replace(location.href);" title="刷新">
+            <i class="layui-icon" style="line-height:30px">&#xe669;</i>
+        </a>
+    </div>
+    <div class="x-body">
+
+        <xblock style="overflow:hidden;" class="xblockformcontainer">
+             <span class="x-right total addclient" >
+                  <div class="layui-row">
+                    <form class="layui-form layui-col-md12 x-so" action="javascript:;">
+                        <input type="text" name="username" id="searchname" placeholder="合同名称、关联客户、类型搜索" autocomplete="off" class="layui-input">
+                        <a class="layui-btn search" data-type="reload"  id="search">
+                            <i class="layui-icon">&#xe615;</i>搜索
+                        </a>
+                    </form>
+                  </div>
+            </span>
+            <button class="layui-btn layui-btn-danger " id="add" style="float:right;">
+                <i class="layui-icon">&#xe61f;</i>创建
+            </button>
+
+        </xblock>
+        <p style="clear:both;"></p>
+        <table id="list" lay-filter="list">
+            <div class="layui-form-item" id="totalContractNumber">
+                <label for="totalMoney" class="layui-form-label">合同总数</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="totalMoney" id="totalContract" autocomplete="off" readonly class="layui-input" style="border: none">
+                </div>
+            </div>
+            <div class="layui-form-item" id="totalMoneycontainer">
+                <label for="totalMoney" class="layui-form-label">合同总金额</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="totalMoney" id="totalMoney" autocomplete="off" readonly class="layui-input" style="border: none">
+                </div>
+            </div>
+
+        </table>
+        <div id="page"></div>
+    </div>
+    <script type="text/html" id="operation">
+        {{# if(d.adminFlag != 1){ }}
+        <!--<a title="编辑" class="layui-btn layui-btn-xs" lay-event="edit" id="edit">编辑</a>-->
+        <a title="查看" class="layui-btn layui-btn-xs" lay-event="info" id="info">查看</a>
+        <!--<a title="保存" class="layui-btn layui-btn-xs" lay-event="save" id="save" style="display: none">保存</a>-->
+        <a title="取消" class="layui-btn layui-btn-xs" lay-event="cancel" id="cancel" style="display: none">取消</a>
+        <!--<a title="删除" class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>-->
+        <!--<a title="重置密码" class="layui-btn layui-btn-danger layui-btn-xs" lay-event="resetPassword">重置密码</a>-->
+        {{# } }}
+    </script>
+    <script>
+        var app = {
+            Commonmethod: Commonmethod(),
+            baseurl: Commonmethod().baseUrl().baseurl,
+            acceccToken: sessionStorage.getItem("accessToken"),
+            init: function () {
+                var _this = this;
+
+                // 初次查询
+                _this.initTable();
+
+                // 事件绑定
+                _this.event();
+            },
+
+            // 获取查询条件参数
+            getSearchParam: function () {
+                var username = $("#searchname").val();
+                var data = {
+                    'name': username
+                };
+                return data;
+            },
+
+            // 初始化表格
+            initTable: function () {
+
+                var _this = this;
+
+                layui.use('table', function () {
+                    var table = layui.table;
+
+                    table.render({
+                        elem: '#list',
+                        url: _this.baseurl + '/api/oms/contract/list',
+                        where: _this.getSearchParam(), //如果无需传递额外参数，可不加该参数
+                        headers: {"Authorization": _this.acceccToken},
+                        method: 'post', //如果无需自定义HTTP类型，可不加该参数
+                        request: { //用于对分页请求的参数：page、limit重新设定名称
+                            pageName: 'pageNum', //页码的参数名称，默认：page
+                            limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                        },
+                        response: { // 用于对返回的数据格式的自定义
+                            statusName: 'resultCode', //数据状态的字段名称，默认：code
+                            statusCode: 0, //成功的状态码，默认：0
+                            msgName: 'resultMsg', //状态信息的字段名称，默认：msg
+                            countName: 'count', //数据总数的字段名称，默认：count
+                            dataName: 'data' //数据列表的字段名称，默认：data
+                        },
+                        height: 540,
+                        cellMinWidth: 80,
+                        cols: [
+                            [{
+                                field: 'order',
+                                title: '序号',
+                                type: 'numbers'
+                            }, {
+                                field: 'number',
+                                title: '合同编号'
+                            }, {
+                                field: 'name',
+                                title: '合同名称'
+                            }, {
+                                field: 'associatedCustomers',
+                                title: '关联客户'
+                            }, {
+                                field: 'type',
+                                title: '类型'
+                            }, {
+                                field: 'money',
+                                title: '合同金额'
+                            }, {
+                                field: 'createName',
+                                title: '创建人'
+                            }, {
+                                field: 'createTime',
+                                title: '创建时间'
+                            }, {
+                                field: 'backMoney',
+                                title: '已回款'
+                            }, {
+                                field: 'leftMoney',
+                                title: '待回款'
+                            }, {
+                                field: 'totalMoney',
+                                title: '项目总支出'
+                            }, {
+                                title: '操作',
+                                align: 'center',
+                                toolbar: '#operation'
+                            }
+                            ]
+                        ],
+                        page: true,
+                        done:function (res) {
+
+                            var totalMoney = 0;
+                            $.each(res.data, function (i, n) {
+                                totalMoney += n.money*1.00;
+                            });
+                            $("#totalMoney").val(totalMoney + '元');
+                            $("#totalContract").val(res.count + '份');
+                        }
+                    });
+
+                    // 监听工具栏
+                    table.on('tool(list)', function (obj) { // list 为 table 的 lay-filter 属性
+
+                        var data = obj.data; //获得当前行数据
+                        var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+                        var tr = obj.tr; //获得当前行 tr 的DOM对象
+
+                        if (layEvent === 'info') { //查看事件
+                            layeropen("查看合同", ['900px', '100%'], "contract-info", "./contract-info.html", ["关闭"],
+                                {
+                                    yes: function (index) {
+                                        // 确定按钮的回调
+                                        var iframe = window['layui-layer-iframe' + index];
+                                        layer.close(index); // 触发提交
+                                    },
+                                    cancel: function (index) {
+                                        // 取消按钮的回调
+                                        layer.close(index);
+                                    },
+                                    success: function (layero, index) {
+                                        // 子窗口弹出前的回调
+
+                                        // 获取子页面的iframe
+                                        var iframe = window['layui-layer-iframe' + index];
+                                        // 向子页面的全局函数child传参
+                                        iframe.app.child(data.id);
+                                        iframe.app.init();
+                                    }
+                                }
+                            );
+
+                        }
+                    });
+                });
+            },
+
+            // 事件绑定
+            event: function () {
+                var _this = this;
+
+                // 查询按钮绑定
+                $("#search").on('click', function () {
+                    _this.initTable();
+                    $("input[name='username']").val(null);
+                });
+
+
+
+                // 添加按钮绑定
+                $("#add").on('click', function () {
+                    layeropen("创建合同", ['700px', '100%'], "contract-add", "./contract-add.html", ["确定", "取消"],
+                        {
+                            yes: function (index) {
+                                // 确定按钮的回调
+                                var iframe = window['layui-layer-iframe' + index];
+                                iframe.app.submit(); // 触发提交
+                            },
+                            cancel: function (index) {
+                                // 取消按钮的回调
+                                layer.close(index);
+                            },
+                            success: function (layero, index) {
+                                // 子窗口弹出前的回调
+                                var iframe = window['layui-layer-iframe' + index];
+                                iframe.app.init();
+                            }
+                        }
+                    );
+                })
+
+            }
+        };
+
+        app.init();
+    </script>
+</body>
+
+</html>

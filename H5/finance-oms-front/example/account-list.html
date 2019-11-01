@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理系统</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv=“X-UA-Compatible” content=“chrome=1″ />
+    <link rel="shortcut icon" href="../images/bitbug_favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="../css/font.css">
+    <link rel="stylesheet" href="../css/xadmin.css">
+    <script type="text/javascript" src="../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../js/xadmin.js"></script>
+    <script type="text/javascript" src="../js/common.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="../js/html5.min.js"></script>
+    <script type="text/javascript" src="../js/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+    <div class="x-nav">
+        <span class="layui-breadcrumb">
+            <a href="">首页</a>
+            <a href="">系统管理</a>
+            <a>
+                <cite>用户管理</cite>
+            </a>
+        </span>
+        <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" href="javascript:location.replace(location.href);"
+            title="刷新">
+            <i class="layui-icon" style="line-height:30px">ဂ</i>
+        </a>
+    </div>
+    <div class="x-body">
+        <div class="layui-row">
+            <form class="layui-form layui-col-md12 x-so">
+                <input type="text" name="search" placeholder="请输入账号" autocomplete="off" class="layui-input" id="search">
+                <button class="layui-btn search" data-type="reload">
+                    <i class="layui-icon">&#xe615;</i>
+                </button>
+            </form>
+        </div>
+        <xblock>
+            <button class="layui-btn layui-btn-danger" onclick="x_admin_show(1,'添加子账号','./account-add.html',null)">
+                <i class="layui-icon">&#xe61f;</i>新增
+            </button>
+            <span class="x-right total" style="line-height:40px"></span>
+        </xblock>
+        <table id="companyList" lay-filter="companyList"></table>
+        <div id="page"></div>
+    </div>
+    <script type="text/html" id="operation">
+        <a title="修改" class="layui-btn layui-btn-xs" lay-event="edit" onclick="x_admin_show(2,'编辑子账号','./account-add.html',null)">编辑</a>
+        <a title="删除" class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del" onclick="member_del(this,'要删除的id')">删除</a>
+    </script>
+    <script>
+        $(function () {
+
+            var accountList = {
+                Commonmethod: Commonmethod(),
+                ngmbaseurl: Commonmethod().baseUrl().baseurl,
+                init: function () {
+                    var _this = this;
+
+                    // 初始化表格数据
+
+                    this.event();
+                },
+                initTable:function(list){
+
+                },
+                event: function () {
+
+                }
+            }
+
+
+
+
+
+
+            ngmbaseurl = Commonmethod().baseUrl().baseurl;
+            var companyList = [];
+            var total, tableIns;
+            var companyparam = JSON.parse(sessionStorage.getItem("userlist"));
+            var accessToken = sessionStorage.getItem("accessToken");
+            var companyId = companyparam.companyId
+            $.ajax({
+                type: 'GET',
+                url: ngmbaseurl + '/api/crowCompany/companyAccount/companyList?pageNum=1&pageSize=10',
+                dataType: 'json',
+                headers: {
+                    "accessToken": accessToken
+                },
+                success: function (res) {
+                    if (res.resultCode == 200) {
+                        inittableparam(res);
+                    }
+                }
+
+            });
+            $('.search').on('click', function (e) {
+                var e = event || window.event;
+                e.preventDefault();
+                var account = $('#search').val();
+                $.ajax({
+                    type: 'GET',
+                    url: ngmbaseurl + '/api/crowCompany/companyAccount/companyList?pageNum=1&pageSize=10&account=' + account,
+                    headers: {
+                        "accessToken": accessToken
+                    },
+                    dataType: 'json',
+                    success: function (res) {
+                        if (res.resultCode == 200) {
+                            inittableparam(res);
+                        }
+                    }
+                });
+            });
+            function inittableparam(res){
+                var companyList = res.data.list;
+                            // tableIns.reload({
+                            //     data: companyList
+                            // });
+                            total = res.data.total;
+                            $('.total').html('共有数据：' + total + ' 条');
+                            layui.use('table', function () {
+                                var table = layui.table;
+                                //table实例
+                                tableIns = table.render({
+                                    elem: '#companyList',
+                                    height: 540,
+                                    cellMinWidth: 80,
+                                    data: companyList,
+                                    cols: [
+                                        [{
+                                            field: 'account',
+                                            title: '账号',
+                                        }, {
+                                            field: 'name',
+                                            title: '姓名',
+                                        }, {
+                                            field: 'roleName',
+                                            title: '角色',
+                                        }, {
+                                            field: 'phone',
+                                            title: '手机号',
+                                        }, {
+                                            field: 'email',
+                                            title: '邮箱',
+
+                                        }, {
+                                            title: '操作',
+                                            align: 'center',
+                                            toolbar: '#operation'
+                                        }]
+                                    ]
+                                });
+                                layui.use(['laypage', 'layer'], function () {
+                                    var laypage = layui.laypage,
+                                        layer = layui.layer;
+                                    //总页数大于页码总数
+                                    laypage.render({
+                                        elem: 'page',
+                                        count: total, //数据总数
+                                        limit: 10,
+                                        jump: function (obj, first) {
+                                            var currentPage = obj.curr;
+                                            //首次不执行
+                                            if (!first) {
+                                                $.ajax({
+                                                    type: 'GET',
+                                                    url: ngmbaseurl + '/api/crowCompany/companyAccount/companyList?pageNum=' + currentPage + '&pageSize=10',
+                                                    headers: {
+                                                        "accessToken": accessToken
+                                                    },
+                                                    dataType: 'json',
+                                                    success: function (res) {
+                                                        if (res.resultCode == 200) {
+                                                            companyList = res.data.list;
+                                                            tableIns.reload({
+                                                                data: companyList,
+                                                            });
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    });
+                                });
+                                //监听工具条
+                                table.on('tool(companyList)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+                                    var data = obj.data; //获得当前行数据
+                                    var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+                                    var tr = obj.tr; //获得当前行 tr 的DOM对象
+
+                                    if (layEvent === 'edit') { //编辑
+                                        data = JSON.stringify(data);
+                                        sessionStorage.setItem('company', data);
+                                        //同步更新缓存对应的值
+                                        var type = sessionStorage.getItem('type');
+                                        var company = sessionStorage.getItem('company-new');
+                                    } else if (layEvent === 'del') { //删除
+                                        layer.confirm('真的删除行么', function (index) {
+                                            //向服务端发送删除指令
+                                            var companyAccountId = data.companyAccountId;
+                                            $.ajax({
+                                                type: 'delete',
+                                                url: ngmbaseurl + '/api/crowCompany/companyAccount/delCompanyAccount/' + companyAccountId,
+                                                headers: {
+                                                    "accessToken": accessToken
+                                                },
+                                                success: function (res) {
+                                                    if (res.resultCode == 200) {
+                                                        obj.del(); //删除对应行（tr）的DOM结构，并更新缓存
+                                                        layer.msg("删除成功");
+                                                    } else {
+                                                        layer.msg(res.resultMsg);
+                                                    }
+                                                }
+                                            });
+                                            layer.close(index);
+                                        });
+                                    }
+                                });
+
+                            });
+            }
+        });
+        function delAll(argument) {
+            var data = tableCheck.getData();
+            layer.confirm('确认要恢复吗？' + data, function (index) {
+                //捉到所有被选中的，发异步进行删除
+                layer.msg('恢复成功', {
+                    icon: 1
+                });
+                $(".layui-form-checked").not('.header').parents('tr').remove();
+            });
+        }
+    </script>
+</body>
+
+</html>

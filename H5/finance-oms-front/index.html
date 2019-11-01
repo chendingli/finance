@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理系统</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv=“X-UA-Compatible” content=“chrome=1″ />
+    <link rel="shortcut icon" href="./images/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="http://at.alicdn.com/t/font_785686_4usoxdfaixe.css"/>
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <link rel="stylesheet" href="./fonts/my-iconfont/iconfont.css">
+    <script type="text/javascript" src="./js/jquery.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/common.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="./js/html5.min.js"></script>
+    <script type="text/javascript" src="./js/respond.min.js"></script>
+    <![endif]-->
+    <style>
+        .bgshow {
+            background: url("./images/welcombg.png") no-repeat;
+            background-size: cover;
+            background-position: 0;
+            overflow: hidden;
+        }
+        .bgshow .weblcomBgUp{
+            width:50%;
+            height:70%;
+            margin:5% auto;
+            display:block;
+        }
+        .left-nav #nav li a cite {
+            font-size: 16px;
+        }
+        #colseAll{
+            position:absolute;
+            right:0px;
+            top:0px;
+            background: #EFEEF0 url() 0 0 no-repeat;
+        }
+        #colseAll ul li .layui-icon{
+            display:none;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 顶部开始 -->
+    <div class="container">
+        <div class="logo">
+            <a href="./index.html">后台管理系统
+            </a>
+        </div>
+        <div class="left_open">
+            <i title="展开左侧栏" class="iconfont">&#xe699;</i>
+        </div>
+
+        <ul class="layui-nav right" lay-filter="">
+            <li class="layui-nav-item">
+                <a href="javascript:void(0);" id="acccontId">admin</a>
+                <dl class="layui-nav-child">
+                    <!-- 二级菜单 -->
+                    <dd>
+                        <a id="userInfo" href="javascript:;">个人信息</a>
+                    </dd>
+                    <dd>
+                        <a href="javascript:void(0);" onclick="dengchu()">退出</a>
+                    </dd>
+                </dl>
+            </li>
+            <li class="layui-nav-item to-index">
+                <a href="javascript:location.replace(location.href);">首页</a>
+            </li>
+        </ul>
+
+    </div>
+    <!-- 顶部结束 -->
+    <!-- 中部开始 -->
+    <!-- 左侧菜单开始 -->
+    <div class="left-nav">
+        <div id="side-nav">
+            <ul id="nav">
+            </ul>
+        </div>
+    </div>
+    <!-- <div class="x-slide_left"></div> -->
+    <!-- 左侧菜单结束 -->
+    <!-- 右侧主体开始 -->
+    <div class="page-content">
+        <div class="layui-tab tab" lay-filter="xbs_tab" lay-allowclose="false">
+            <ul class="layui-tab-title">
+                <li id="mydesktop">我的桌面</li>
+                <div id="colseAll">
+                    <ul>
+                        <li id="tabcolse"><button class=" layui-btn layui-btn-sm layui-btn-primary">关闭所有</button></li>
+                    </ul>
+                </div>
+            </ul>
+            <div class="layui-tab-content">
+                <div class="layui-tab-item layui-show bgshow">
+                    <!--<img src="./images/weblcomBgUp.png" alt="" class="weblcomBgUp">-->
+                    <!-- <iframe src='./welcome.html' frameborder="0" scrolling="yes" class="x-iframe"></iframe> -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="page-content-bg"></div>
+    <!-- 右侧主体结束 -->
+    <!-- 中部结束 -->
+    <!-- 底部开始 -->
+    <div class="footer">
+        <div class="copyright">Copyright ©2017 Crew v2.3 All Rights Reserved</div>
+    </div>
+    <!-- 底部结束 -->
+
+    <!-- 左侧菜单模板 -->
+    <script type="text/html" id="menu">
+        {{#  layui.each(d, function(index, item){ }}
+        <li>
+            <a href="javascript:;">
+                {{# if(item.ico) { }}
+                <i class="iconfont {{item.ico}}"></i>
+                {{# } else { }}
+                <i class="iconfont">&#xe6a7;</i>
+                {{# } }}
+                <cite class="indextitle">{{ item.name }}</cite>
+                <i class="iconfont nav_right">&#xe697;</i>
+            </a>
+            <ul class="sub-menu">
+                {{#  layui.each(item.children, function(index, item){ }}
+                <li>
+                    <a _href={{item.url}}>
+                        {{# if(item.ico) { }}
+                        <i class="iconfont {{item.ico}}"></i>
+                        {{# } else { }}
+                        <i class="iconfont">&#xe6a7;</i>
+                        {{# } }}
+                        <cite>{{ item.name }}</cite>
+                    </a>
+                </li>
+                {{#  }); }}
+            </ul>
+        </li>
+        {{#  }); }}
+    </script>
+
+    <script>
+
+        // 登出
+        function dengchu() {
+            sessionStorage.clear();
+            location.href = './login.html';
+        }
+
+        $(function () {
+            var index = {
+                Commonmethod: Commonmethod(),
+                ngmbaseurl: Commonmethod().baseUrl().baseurl,
+                colseAlldom:$("#colseAll"),
+
+                init: function () {
+                    var _this = this;
+
+                    // 设置用户信息
+                    var user = JSON.parse(sessionStorage.getItem("user"));
+                    var ngmbaseurl = Commonmethod().baseUrl().baseurl;
+                    if (user) {
+                        $("#acccontId").html(user.username);
+                    }
+
+                    // 初始化菜单
+                    var getTpl = document.getElementById('menu').innerHTML;
+                    var view = document.getElementById('nav');
+                    var menuList = JSON.parse(sessionStorage.getItem("menuList"));
+                    layui.use('laytpl', function() {
+                        var laytpl = layui.laytpl;
+                        laytpl(getTpl).render(menuList, function (html) {
+                            view.innerHTML = html;
+                        });
+                    });
+
+                    this.event();
+                },
+                event: function () {
+                    var _this = this;
+
+                    $("#userInfo").on("click",function() {
+                        layeropen("个人信息",[550 + 'px', ($(window).height() - 200) + 'px'],"account-info","./account-info.html",["确定","取消"],
+                                {
+                                    yes:function(index){
+                                        // 确定按钮的回调
+                                        var iframe = window['layui-layer-iframe' + index];
+                                        iframe.app.submit(); // 触发提交
+                                    },
+                                    cancel:function(index){
+                                        // 取消按钮的回调
+                                        layer.close(index);
+                                    },
+                                    success:function(layero,index){
+                                        // 子窗口弹出前的回调
+
+                                        // 获取子页面的iframe
+                                        var iframe = window['layui-layer-iframe' + index];
+                                        // 向子页面的全局函数child传参
+                                        iframe.app.child(JSON.parse(sessionStorage.getItem("user")).id);
+                                        iframe.app.init();
+                                    }
+                                }
+                        );
+                    });
+                    $("#tabcolse").click(function (e) {
+                        var e=event||window.event;
+                        e.stopPropagation();
+                        e.preventDefault();
+                        var tabitem=$('.layui-tab-item');
+                        var tabcontent=$(".layui-tab-title").eq(0).find("li");
+                        debugger;
+                        $.each(tabitem,function(index,item){
+                             $(item).not(".bgshow").remove();
+                             $(".bgshow").eq(0).addClass("layui-show");
+                        });
+                        $.each(tabcontent,function (index,item) {
+                            console.log(item);
+                            console.log($(item).filter("#tabcolse"))
+                            $(item).not("#tabcolse").not("#mydesktop").remove();
+                        })
+                    })
+
+                }
+            }
+            index.init();
+        })
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理系统</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv=“X-UA-Compatible” content=“chrome=1″ />
+    <link rel="shortcut icon" href="../images/bitbug_favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="../css/font.css">
+    <link rel="stylesheet" href="../css/xadmin.css">
+    <script type="text/javascript" src="../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../js/xadmin.js"></script>
+    <script type="text/javascript" src="../js/common.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="../js/html5.min.js"></script>
+    <script type="text/javascript" src="../js/respond.min.js"></script>
+    <![endif]-->
+    <style>
+        .adminList {
+            width: 100%;
+            max-height: 100% !important;
+            min-height: 0;
+        }
+
+        .adminList .layui-input,
+        .layui-textarea {
+            display: block;
+            width: 50%;
+        }
+
+        .adminList .layui-form {
+            margin-top: 50px;
+        }
+
+        .adminList .layui-form-select .layui-edge {
+            position: absolute;
+            left: 45%;
+            top: 50%;
+            margin-top: -3px;
+            cursor: pointer;
+            border-width: 6px;
+            border-top-color: #c2c2c2;
+            border-top-style: solid;
+            transition: all .3s;
+            -webkit-transition: all .3s;
+        }
+        .layui-form-item .layui-input-inline {
+                float: left;
+                width: 190px;
+                margin-right:0px;
+            }
+    </style>
+</head>
+
+<body class="adminList">
+    <div>
+        <form class="layui-form" method="post">
+            <div class="layui-form-item">
+                <label class="layui-form-label">帐号</label>
+                <div class="layui-input-block">
+                    <input type="text" id="userName" name="username" required lay-verify="username" placeholder="请输入帐号" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">姓名</label>
+                <div class="layui-input-block">
+                    <input type="text" id="name" name="name" required lay-verify="name" placeholder="请输入帐号" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">手机号</label>
+                <div class="layui-input-block">
+                    <input type="text" id="phone" name="phone" required lay-verify="phone" placeholder="请输入手机号" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">邮箱</label>
+                <div class="layui-input-block">
+                    <input type="text" id="email" name="email" required lay-verify="required" placeholder="请输入邮箱" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn usersub" lay-submit lay-filter="formDemo">确定</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <script>
+        $(function () {
+            var userInfo = {
+                Commonmethod: Commonmethod(),
+                init: function () {
+                    var _this = this;
+                    var user = sessionStorage.getItem("user");
+                    user = JSON.parse(user);
+                    $("#userName").val(user.username);
+                    $("#name").val(user.name);
+                    $("#phone").val(user.phone);
+                    $("#email").val(user.email);
+                    this.event();
+                },
+                event: function () {
+                    var _this = this;
+
+                    layui.use('form', function () {
+                        var form = layui.form;
+
+                        form.on('submit(formDemo)', function (data) {
+                            x_admin_close();
+                            return false;
+                        });
+                    });
+                }
+            }
+            userInfo.init()
+        })
+    </script>
+</body>
+
+</html>

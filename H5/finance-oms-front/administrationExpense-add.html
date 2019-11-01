@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理系统</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv=“X-UA-Compatible” content=“chrome=1″ />
+    <link rel="shortcut icon" href="./images/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/common.js"></script>
+    <link rel="stylesheet" href="./lib/zTree_v3/css/zTreeStyle/zTreeStyle.css" type="text/css">
+    <script type="text/javascript" src="./lib/zTree_v3/js/jquery.ztree.core.js"></script>
+    <script type="text/javascript" src="./lib/zTree_v3/js/jquery.ztree.excheck.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="./js/html5.min.js"></script>
+    <script type="text/javascript" src="./js/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+    <div class="layui-container x-body">
+        <div class="layui-row">
+            <form class="layui-form" id="role-data" style="position: relative;left: 50%;margin-left: -176px">
+                <div class="layui-form-item">
+                    <label for="type" class="layui-form-label">
+                        <span class="x-red">*</span>类型
+                    </label>
+                    <div class="layui-input-inline">
+                        <select name="type" id="type" class="type" lay-filter="type">
+                            <option value="" selected>请选择</option>
+                            <option value="0" >采购</option>
+                            <option value="1" >物业水电</option>
+                            <option value="2" >场地租金</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="expense" class="layui-form-label">
+                        <span class="x-red">*</span>金额
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="expense" id="expense" placeholder="请填写" lay-verify="required|expense" autocomplete="off" class="layui-input" maxlength="20">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="createName" class="layui-form-label">
+                        <span class="x-red">*</span>创建人
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="createName" id="createName" style="border: none" readonly autocomplete="off" class="layui-input" maxlength="20">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="time" class="layui-form-label">
+                        <span class="x-red">*</span>时间
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="time" placeholder="yyyy-MM-dd" id="time"  lay-verify="required|time" autocomplete="off" class="layui-input" maxlength="20">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="details" class="layui-form-label">
+                        <span class="x-red">*</span>明细
+                    </label>
+                    <div class="layui-input-inline" >
+                        <textarea  name="details" id="details"  placeholder="请输入" lay-verify="required" autocomplete="off" class="layui-input" style="height: 120px;padding: 10px" maxlength="200"></textarea>
+                    </div>
+                </div>
+                <div class="layui-form-item" >
+                    <label for="remarks" class="layui-form-label">
+                        备注
+                    </label>
+                    <div class="layui-input-inline" style="height: 50px">
+                        <textarea name="remarks" id="remarks" placeholder="请输入"  autocomplete="off" class="layui-input" style="height: 120px;padding: 10px" maxlength="200" rows="6" ></textarea>
+                    </div>
+                </div>
+                <div class="layui-col-md12" style="display: none;">
+                    <div class="layui-form-item">
+                        <label for="submit" class="layui-form-label">
+                        </label>
+                        <button class="layui-btn" id="submit" lay-filter="add" lay-submit>
+                            提交
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        layui.use('laydate', function(){
+            var laydate = layui.laydate;
+
+            //执行一个laydate实例
+            laydate.render({
+                elem: '#time' //指定元素
+            });
+        });
+    </script>
+
+    <script>
+        var app = {
+            Commonmethod: Commonmethod(),
+            baseurl: Commonmethod().baseUrl().baseurl,
+            treeObj:null,
+            init: function () {
+                var _this = this;
+
+                this.event();
+
+
+            },
+
+
+            event:function(){
+                var _this = this;
+                $("#createName").val(JSON.parse(sessionStorage.getItem("user")).username);
+            },
+            submit:function() {
+
+                var _this = this;
+
+                // 绑定表单提交
+                layui.use('form', function () {
+                    var form = layui.form;
+
+                    form.verify({
+                        expense:function (value,index) {
+                            var reg = /^\d+(\.\d+)?$/;
+                            if(!reg.exec(value)){
+                                return '请输入数字';
+                            }
+                        }
+                    });
+                    form.on('submit(add)', function (data) {
+                        console.log(data.field);
+                        // 提交表单
+                        _this.Commonmethod.ajax(
+                                Commonmethod().baseUrl().baseurl + '/api/oms/administrationExpense/add',
+                                data.field,
+                                null,
+                                function (res) {
+                                    var index = parent.layer.getFrameIndex(window.name);
+                                    layer.close(index);
+                                    parent.location.reload();
+                                }
+                        );
+                        return false;
+
+                    });
+                });
+
+                $('#submit').trigger('click');
+
+            }
+        };
+
+        app.init();
+    </script>
+</body>
+
+</html>

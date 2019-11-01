@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理系统</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8"/>
+    <meta http-equiv="Cache-Control" content="no-siteapp"/>
+    <meta http-equiv=“X-UA-Compatible” content=“chrome=1″/>
+    <link rel="shortcut icon" href="./images/favicon.ico" type="image/x-icon"/>
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/common.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="./js/html5.min.js"></script>
+    <script type="text/javascript" src="./js/respond.min.js"></script>
+    <![endif]-->
+</head>
+<style>
+    .my-edit {
+        border-color: rgba(125, 125, 125, .3) !important;
+        box-shadow: 2px 2px 2px #cdc8c0;
+        background: #fffbfd !important;
+    }
+</style>
+<body>
+<div class="x-nav">
+        <span class="layui-breadcrumb">
+            <a href="javascript:;">人员管理</a>
+            <a>
+                <cite>人员列表</cite>
+            </a>
+        </span>
+</div>
+<div class="x-body">
+
+    <xblock>
+        <!--href="/api/oms/personl/exportStuInfoExcel"-->
+        <!--<form action="javascript:;" class="layui-form-item">-->
+
+        <button class="layui-btn layui-btn-radius layui-btn-primary layui-form" lay-submit lay-filter="export"
+                id="export">
+            <i class="layui-icon">&#xe61f;</i>导出
+
+        </button>
+
+        <!--</form>-->
+        <!--<a title="编辑" class="layui-btn layui-btn-sm layui-btn-radius layui-btn-primary" lay-event="export" id="export">编辑</a>-->
+
+
+        <button class="layui-btn layui-btn-radius layui-btn-normal" id="add">
+            <i class="layui-icon">&#xe61f;</i>新增
+        </button>
+        <span class="x-right total" style="line-height:40px"></span>
+    </xblock>
+    <table id="list" lay-filter="list"></table>
+    <div id="page"></div>
+</div>
+<script type="text/html" id="operation">
+    {{# if(d.adminFlag != 1){ }}
+    <a title="编辑" class="layui-btn layui-btn-sm layui-btn-radius layui-btn-primary" lay-event="edit" id="edit">编辑</a>
+    {{# } }}
+</script>
+<script>
+    var app = {
+        Commonmethod: Commonmethod(),
+        baseurl: Commonmethod().baseUrl().baseurl,
+        acceccToken: sessionStorage.getItem("accessToken"),
+        init: function () {
+            var _this = this;
+
+            // 初次查询
+            _this.initTable();
+
+            // 事件绑定
+            _this.event();
+        },
+
+
+        // 初始化表格
+        initTable: function () {
+            var _this = this;
+
+            layui.use('table', function () {
+                var table = layui.table;
+
+                table.render({
+                    elem: '#list',
+                    url: _this.baseurl + '/api/oms/personl/list',
+                    where: null, //如果无需传递额外参数，可不加该参数
+                    headers: {"Authorization": _this.acceccToken},
+                    method: 'post', //如果无需自定义HTTP类型，可不加该参数
+                    request: { //用于对分页请求的参数：page、limit重新设定名称
+                        pageName: 'pageNum', //页码的参数名称，默认：page
+                        limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                    },
+                    response: { // 用于对返回的数据格式的自定义
+                        statusName: 'resultCode', //数据状态的字段名称，默认：code
+                        statusCode: 0, //成功的状态码，默认：0
+                        msgName: 'resultMsg', //状态信息的字段名称，默认：msg
+                        countName: 'count', //数据总数的字段名称，默认：count
+                        dataName: 'data' //数据列表的字段名称，默认：data
+                    },
+                    height: 540,
+                    cellMinWidth: 80,
+                    cols: [
+                        [{
+                            field: 'id',
+                            title: '序号',
+                            type: 'numbers'
+                        }, {
+                            field: 'unmberId',
+                            title: '员工编号'
+                        }, {
+                            field: 'name',
+                            title: '员工姓名'
+                        }, {
+                            field: 'sal',
+                            title: '工资'
+                        }, {
+                            field: 'state',
+                            title: '员工状态'
+                        }, {
+                            field: 'type',
+                            title: '合同类型'
+                        }, {
+                            title: '操作',
+                            align: 'center',
+                            toolbar: '#operation'
+                        }]
+                    ],
+                    page: true
+                });
+
+
+                // 监听工具栏
+                table.on('tool(list)', function (obj) { // list 为 table 的 lay-filter 属性
+
+                    var data = obj.data; //获得当前行数据
+                    var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+
+                    // var colums = "name"+","+"phone"+","+"email"+","+"comment"+",";//可以修改的字段名称
+
+
+                    if (layEvent === 'edit') { //编辑事件
+
+                        layeropen("人员修改", ['550px', '90%'], "personl-edit", "./personl-edit.html", ["确定", "取消"],
+                            {
+                                yes: function (index) {
+//                                            // 确定按钮的回调
+                                    var iframe = window['layui-layer-iframe' + index];
+                                    iframe.app.submit(); // 触发提交
+                                },
+                                cancel: function (index) {
+//                                            // 取消按钮的回调
+                                    layer.close(index);
+                                },
+                                success: function (layero, index) {
+//                                            // 子窗口弹出前的回调
+//
+//                                            // 获取子页面的iframe
+                                    var iframe = window['layui-layer-iframe' + index];
+//                                            // 向子页面的全局函数child传参
+                                    iframe.app.child(data.id);
+                                    iframe.app.init();
+                                }
+                            }
+                        );
+                    }
+                });
+            });
+        },
+
+        // 事件绑定
+        event: function () {
+            var _this = this;
+
+
+            // 添加按钮绑定
+            $("#add").on('click', function () {
+                layeropen("添加人员", ['550px', '90%'], "personl-add", "./personl-add.html", ["确定", "取消"],
+                    {
+                        yes: function (index) {
+                            // 确定按钮的回调
+                            var iframe = window['layui-layer-iframe' + index];
+                            iframe.app.submit(); // 触发提交
+                        },
+                        cancel: function (index) {
+                            // 取消按钮的回调
+                            layer.close(index);
+                        },
+                        success: function (layero, index) {
+                            // 子窗口弹出前的回调
+                            var iframe = window['layui-layer-iframe' + index];
+                            iframe.app.init();
+                        }
+                    }
+                );
+            });
+            // $("#export").on('click', function () {
+            //     app.submit();
+            // })
+
+
+            $("#export").on('click',function() {
+                var  activityId = $("#activitiesId").val();
+                window.location.href=Commonmethod().baseUrl().baseurl + '/api/oms/personl/exportStuInfoExcel';
+            })
+        },
+        submit: function () {
+            var _this = this;
+            layui.use('form', function () {
+                var form = layui.form;
+                _this.form = form;
+                form.on('submit(export)', function (data) {
+                    _this.Commonmethod.ajax(
+                        Commonmethod().baseUrl().baseurl + '/api/oms/personl/exportStuInfoExcel',
+                        data.field,
+                        {type:'post'},
+                        function (res) {
+                            console.log(res);
+                            debugger;
+                            setTimeout(function () {
+                                // window.location.href = res.data;
+
+                            }, );
+
+                            /*_this.Commonmethod.ajax(
+                                res.data,
+                                null,
+                                null,
+                                function () {
+                                    var index = parent.layer.getFrameIndex(window.name);
+                                    layer.msg("成功！");
+                                    setTimeout(function () {
+                                        layer.close(index);
+                                        parent.location.reload();
+                                    }, 1500);
+
+                                }
+                            );*/
+
+
+                            /*
+                            var index = parent.layer.getFrameIndex(window.name);
+                            layer.msg("成功！");
+                            setTimeout(function () {
+                                layer.close(index);
+                                parent.location.reload();
+                            }, 1500);*/
+
+                        }
+                    );
+                    return false;
+                });
+
+            });
+            // $("#export").trigger('click');
+        }
+    };
+
+    app.init();
+</script>
+</body>
+
+</html>

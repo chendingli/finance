@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理系统</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv=“X-UA-Compatible” content=“chrome=1″ />
+    <link rel="shortcut icon" href="./images/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/common.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="./js/html5.min.js"></script>
+    <script type="text/javascript" src="./js/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+<div class="x-body layui-container">
+    <div class="layui-row">
+        <form class="layui-form" id="account-data" action="javascript:;">
+            <input type="hidden" name="id" id="id">
+            <div class="layui-form-item">
+                <label for="username" class="layui-form-label">
+                    <span class="x-red">*</span>账号
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" id="username" name="username" lay-verify="required|username" autocomplete="off" class="layui-input" maxlength="20" readonly>
+                </div>
+                <div class="layui-form-mid layui-word-aux">
+                    <span class="x-red">*</span>将会成为您唯一的登入名
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label for="name" class="layui-form-label">
+                    <!--<span class="x-red">*</span>-->姓名
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" id="name" name="name" lay-verify="name" autocomplete="off" class="layui-input" maxlength="20">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label for="phone" class="layui-form-label">
+                    <!--<span class="x-red">*</span>-->手机号
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" id="phone" name="phone" lay-verify="phone" autocomplete="off" class="layui-input" maxlength="11">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label for="email" class="layui-form-label">
+                    <!--<span class="x-red">*</span>-->邮箱
+                </label>
+                <div class="layui-input-inline">
+                    <input type="email" id="email" name="email" lay-verify="email" autocomplete="off" class="layui-input" maxlength="50">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label for="comment" class="layui-form-label">
+                    <!--<span class="x-red">*</span>-->备注
+                </label>
+                <div class="layui-input-inline">
+                    <textarea id="comment" name="comment" lay-verify="comment" autocomplete="off"  class="layui-textarea" maxlength="200"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label for="comment" class="layui-form-label">
+                    <span class="x-red">*</span>角色
+                </label>
+                <input type="hidden" name="roleIds" id="roleIds" lay-verify="roleIds">
+                <div class="layui-input-block" id="roleCheckBox">
+                </div>
+            </div>
+            <div class="layui-form-item" style="display: none;">
+                <label for="submit" class="layui-form-label">
+                </label>
+                <button class="layui-btn" id="submit" lay-filter="add" lay-submit>
+                    提交
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    var app = {
+        Commonmethod: Commonmethod(),
+        baseurl: Commonmethod().baseUrl().baseurl,
+        treeObj:null,
+        form:null,
+        init: function () {
+            var _this = this;
+            this.initForm();
+            this.event();
+        },
+        initForm:function() {
+            var _this = this;
+
+            // 获取所有的角色
+            _this.Commonmethod.ajax(
+                    Commonmethod().baseUrl().baseurl + '/api/oms/role/listAll',
+                    null,
+                    {async:false},
+                    function (res) {
+                        if(res.data) {
+                            layui.use('form', function () {
+                                var form = layui.form;
+                                res.data.forEach(function(value){
+                                    $("#roleCheckBox").append('<input type="checkbox" lay-skin="primary" value="'+value.id+'" title="'+value.name+'">');
+                                });
+                                form.render();
+                            });
+                        } else {
+                            $("#roleCheckBox").append('没有任何角色');
+                        }
+                    }
+            );
+
+            // 获取用户信息
+            _this.Commonmethod.ajax(
+                    Commonmethod().baseUrl().baseurl + '/api/oms/user/get',
+                    {id:$("#id").val()},
+                    null,
+                    function (res) {
+                        layui.use('form', function () {
+                            var form = layui.form;
+
+                            $("#id").val(res.data.id);
+                            $("#username").val(res.data.username);
+                            $("#name").val(res.data.name);
+                            $("#phone").val(res.data.phone);
+                            $("#email").val(res.data.email);
+                            $("#comment").val(res.data.comment);
+
+                            // 勾选用户拥有的角色
+                            var roleArray = [];
+                            res.data.roleList.forEach(function(value,index,array){
+                                roleArray.push(value.id);
+                            });
+
+                            $.each($("#roleCheckBox :checkbox"),function(index,item){
+                                var roleId = parseInt($(item).val());
+                                if($.inArray(roleId,roleArray) >= 0) {
+                                    $(item).attr("checked",true);
+                                }
+                            });
+
+                            form.render();
+                        });
+
+                    }
+            );
+
+        },
+        event:function(){
+            var _this = this;
+
+        },
+        // 父窗口传参
+        child:function(id){
+            $("#id").val(id);
+        },
+        submit:function() {
+
+            var _this = this;
+
+            // 设置选中的角色
+            var roleIds = [];
+            $.each($("input:checked"),function(index,item){
+                roleIds.push($(item).val());
+            });
+            $("#roleIds").val(roleIds.join(","));
+
+            // 绑定表单提交
+            layui.use('form', function () {
+                var form = layui.form;
+                _this.form = form;
+                form.verify({
+                    username: function (value) {
+                        var pattern = $.trim(value);
+                        if ((!value) || (pattern.length > 20)) {
+                            return '账号长度不可超过20';
+                        } else if (value.indexOf(' ') != -1) {
+                            return '不允许有空格，请修改';
+                        }
+                    },
+                    name: function (value) {
+                        if(value.length > 20){
+                            return '姓名长度不能超过20'
+                        }
+                    },
+                    phone: function (value) {
+                        var pattern = /^1[3|4|5|7|8][0-9]\d{8}$/;
+                        if (value && !pattern.test(value)) {
+                            return '手机号格式不对';
+                        }
+                    },
+                    email: function (value) {
+                        var pattern = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(\.[a-zA-Z0-9_-])+/;
+                        if (value && !(pattern.test(value))) {
+                            return '邮箱格式不对';
+                        }else if (value && ((value.length>50)||(value.length<6))) {
+                            return '邮箱长度超过限制，请输入6-50位的邮箱';
+                        }
+                    },
+                    comment: function (value) {
+                        if(value && value.length > 200){
+                            return '备注长度不能超过200';
+                        }
+                    },
+                    roleIds: function (value) {
+                        if(value.length == 0){
+                            return '请为用户至少分配一个角色';
+                        }
+                    }
+                });
+
+                form.on('submit(add)', function (data) {
+                    // 提交表单
+                    _this.Commonmethod.ajax(
+                            Commonmethod().baseUrl().baseurl + '/api/oms/user/update',
+                            data.field,
+                            null,
+                            function (res) {
+                                var index = parent.layer.getFrameIndex(window.name);
+                                layer.msg("修改成功！");
+                                setTimeout(function () {
+                                    layer.close(index);
+                                    parent.location.reload();
+                                },1500);
+
+                            }
+                    );
+                    return false;
+
+                });
+            });
+
+            $('#submit').trigger('click'); // 触发表单提交
+
+        }
+    };
+</script>
+</body>
+
+</html>

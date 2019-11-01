@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>欢迎页面-X-admin2.0</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"
+    />
+    <link rel="shortcut icon" href="images/bitbug_favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+   <script type="text/javascript" src="./js/jquery.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+      <script src="./js/html5.min.js"></script>
+      <script src="./js/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+    <div class="x-body">
+        <form class="layui-form" id="account-data">
+            <div class="layui-form-item">
+                <label for="L_account" class="layui-form-label">
+                    <span class="x-red">*</span>账号
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" id="L_account" name="account" lay-verify="required|announTuserName" autocomplete="off" class="layui-input">
+                </div>
+                <div class="layui-form-mid layui-word-aux">
+                    <span class="x-red">*</span>将会成为您唯一的登入名
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label for="L_password" class="layui-form-label">
+                    <span class="x-red">*</span>密码
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" id="L_password" name="password" lay-verify="accounTpass|required" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label for="L_username" class="layui-form-label">
+                    <span class="x-red">*</span>姓名
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" id="L_username" name="name" lay-verify="announTuserName|required" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label for="L_email" class="layui-form-label">
+                    <!-- <span class="x-red">*</span> -->
+                    <span class="x-red">*</span> 角色
+                </label>
+                <div class="layui-input-inline">
+                    <select name="roleId" id="roleName" class="layui-form taskaddbox" lay-verify="required">
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label for="L_phone" class="layui-form-label">
+                    <span class="x-red">*</span>手机号
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" id="L_phone" name="phone" lay-verify="required|phone" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label for="L_email" class="layui-form-label">
+                    <span class="x-red">*</span>邮箱
+                </label>
+                <div class="layui-input-inline">
+                    <input type="email" id="L_email" name="email" lay-verify="required|email" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label for="L_submit" class="layui-form-label">
+                </label>
+                <button class="layui-btn" id="L_submit" lay-filter="add" lay-submit>
+                    提交
+                </button>
+            </div>
+        </form>
+    </div>
+    <script src="js/common.js"></script>
+    <script>
+        var ngmbaseurl;
+        $(function () {
+            ngmbaseurl = Commonmethod().baseUrl().baseurl;
+            var company = sessionStorage.getItem('company');
+            var dataShow = sessionStorage.getItem('dataShow');
+            var companyAccountId;
+            var accessToken=sessionStorage.getItem("accessToken");
+            if (company && dataShow == "2") {
+                company = JSON.parse(company);
+                companyAccountId = company.companyAccountId;
+                $.ajax({
+                    type: 'get',
+                    url: ngmbaseurl + '/api/crowCompany/role',
+                    data: {},
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    async: false,
+                    headers:{
+                        "accessToken":accessToken
+                    },
+                    success: function (res) {
+                        if (res.resultCode == 200) {
+                            var option = "";
+                            var list=res.data.list;
+                            var defaults = '<option>请选择</option>';
+                            for (var i = 0;i<list.length; i++) {
+                                option += '<option value="' + list[i].roleId + '" id="' + list[i].roleId + '">' + list[i].roleName + '</option>'
+                            }
+                            $("#roleName").empty().append(defaults).append(option);
+                            //.val(company.roleId)
+                            $.each($('#roleName').find('option'), function (index, item) {
+                                if (item.value == company.roleId) {
+                                    $(item).prop('selected', true)
+                                }
+                            })
+                            layui.use('form', function () {
+                                var form = layui.form;
+                                form.verify();
+                                form.render('select')
+                                return false;
+                            });
+
+                        } else {
+                            layer.msg(res.resultMsg);
+                        }
+                    },
+
+                });
+                $('#L_account').attr('readonly', 'true');
+                $('#L_account').css('background', '#ccc');
+                $('#L_account').val(company.account);
+                $('#L_password').val("*************").removeAttr("lay-verify");
+                $('#L_username').val(company.name);
+                $('#L_phone').val(company.phone);
+                $('#L_email').val(company.email);
+                
+            } else {
+                $("#account-data")[0].reset();
+                $('#L_account').val('');
+                $('#L_password').val('').attr("lay-verify","accounTpass|required");
+                $("#L_password").prop("type",'text');
+                $.ajax({
+                    type: 'get',
+                    url: ngmbaseurl + '/api/crowCompany/role',
+                    data: {},
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    headers:{
+                        "accessToken":accessToken
+                    },
+                    success: function (res) {
+                        console.log(res);
+                        var list=res.data.list;
+                        if (res.resultCode == 200) {
+                            var option = "";
+                            var defaults = '<option value="">请选择</option>';
+                            for (var i = 0;i<list.length; i++) {
+                                option += '<option value="' + list[i].roleId + '" id="' + list[i].roleId + '">' + list[i].roleName + '</option>'
+                            }
+                            $("#roleName").empty().append(defaults).append(option);
+                            layui.use('form', function () {
+                                var form = layui.form;
+                                form.verify();
+                                form.render('select')
+                                return false;
+                            });
+
+                        } else {
+                            layer.msg(res.resultMsg);
+                        }
+                    },
+
+                });
+            }
+
+            layui.use(['form', 'layer'], function () {
+                $ = layui.jquery;
+                var form = layui.form,
+                    layer = layui.layer;
+                //自定义验证规则
+                form.verify({
+                    phone: function (value) {
+                        var pattern = !/^1[3|4|5|8][0-9]\d{4,8}$/;
+                        if (!/^1[3|4|5|8][0-9]\d{4,8}$/.test(Number(value))) {
+                            return '手机号格式不对';
+                        }
+                    },
+                    accounTpass: function (value) {
+                        debugger;
+                        var passaccount=/^[\w]{6,12}$/;
+                        if (value.indexOf(' ') != -1) {
+                            return '不允许有空格，请修改……';
+                        }else if(!passaccount.test(value)){
+                            return '请输入6~12位密码，包含字母、数字、特殊字符'
+                        }
+                    },
+                    email: function (value) {
+                        var pattern = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(\.[a-zA-Z0-9_-])+/;
+                        if (value && !(pattern.test(value))) {
+                            return '邮箱格式不对';
+                        }else if (value && (value.length>20)||(value.length<6)) {
+                            return '邮箱长度超过限制，请输入6-20位的邮箱';
+                        }
+                    },
+                    announTuserName: function (value) {
+                        var pattern = $.trim(value);
+                        if ((!value) || (pattern.length > 9)) {
+                            return '账号不可超过9位数';
+                        } else if (value.indexOf(' ') != -1) {
+                            return '不允许有空格，请修改……';
+                        }
+                    }
+                });
+                //监听提交
+                form.on('submit(add)', function (data) {
+                    var data = data.field;
+                    if($("#roleName").val()=='请选择'){
+                        layer.msg('请把信息填写完整');
+                        return false;
+                    }
+                    debugger;
+                      if($('#L_password').val()=="*************"){
+                        $('#L_password').val("");
+                        data.password='';
+                      }
+                    if (company && dataShow == "2") {
+                        $.ajax({
+                            type: 'PUT',
+                            url: ngmbaseurl + '/api/crowCompany/companyAccount/companyAccount/' + companyAccountId,
+                            data: JSON.stringify(data),
+                            contentType: "application/json; charset=utf-8",
+                            dataType: 'json',
+                            headers:{
+                                "accessToken":accessToken
+                            },
+                            success: function (res) {
+                                if (res.resultCode == 200) {
+                                    var company = JSON.stringify(data);
+                                    sessionStorage.removeItem('company');
+                                    sessionStorage.setItem('company-new', company);
+                                    sessionStorage.setItem('type', 1);
+                                    layer.alert("修改成功", function () {
+                                        // 获得frame索引
+                                        var index = parent.layer.getFrameIndex(window.name);
+                                        //关闭当前frame
+                                        parent.layer.close(index);
+                                        parent.layer.reload();
+                                    });
+                                } else {
+                                    layer.msg(res.resultMsg);
+                                }
+                            },
+                            error: function () {
+                                layer.msg("修改失败，请重新提交");
+                            }
+                        });
+                        return false;
+                    } else {
+                        $.ajax({
+                            type: 'POST',
+                            url: ngmbaseurl + '/api/crowCompany/companyAccount/addCompanyAccount',
+                            dataType: 'json',
+                            contentType: "application/json; charset=utf-8",
+                            headers:{
+                                "accessToken":accessToken
+                            },
+                            data: JSON.stringify(data),
+                            success: function (res) {
+                                if (res.resultCode == 200) {
+                                    layer.alert("新增成功", function () {
+                                        var index = parent.layer.getFrameIndex(window.name);
+                                        parent.layer.close(index);
+                                    });
+                                } else {
+                                    layer.msg(res.resultMsg);
+                                }
+                            },
+                            error: function () {
+                                layer.msg("新增失败，请重新提交");
+                            }
+                        });
+                        return false;
+                    }
+                });
+            });
+        });
+
+    </script>
+</body>
+
+</html>

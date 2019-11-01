@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理系统</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv=“X-UA-Compatible” content=“chrome=1″ />
+    <link rel="shortcut icon" href="./images/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/common.js"></script>
+    <link rel="stylesheet" href="./lib/zTree_v3/css/zTreeStyle/zTreeStyle.css" type="text/css">
+    <script type="text/javascript" src="./lib/zTree_v3/js/jquery.ztree.core.js"></script>
+    <script type="text/javascript" src="./lib/zTree_v3/js/jquery.ztree.excheck.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="./js/html5.min.js"></script>
+    <script type="text/javascript" src="./js/respond.min.js"></script>
+    <![endif]-->
+
+    <style type="text/css">
+        .layui-input{
+            background-color: #f8f8f8;
+            color: #919191;
+            width: 320px;
+            display: inline-block;
+        }
+        .layui-form-label{
+            width: 250px;
+        }
+        .layui-form-item .layui-input-inline{
+            width: 360px;
+
+        }
+        .per{
+            display: inline-block;
+            margin-left: 5px;
+            width: 25px;
+            height: 25px;
+            font-size: 16px;
+            line-height: 25px;
+
+        }
+    #contract-url{
+        position: absolute;
+        font-size: 16px;
+        left: -45px;
+        width: 50px;
+        color: #000;
+        display: none;
+    }
+        
+
+    </style>
+
+</head>
+
+<body>
+    <div class="layui-container x-body">
+        <div class="layui-row">
+
+            <form class="layui-form" id="role-data" >
+                <input type="hidden" name="id" id="id">
+                <label  class="layui-form-label " style="font-size: large;font-weight: bold; margin-bottom: 10px;">
+                    合同信息
+                </label>
+                <div class="layui-form-item">
+                    <label for="number" class="layui-form-label ">
+                        合同编号
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="number" id="number" autocomplete="off" class="layui-input" readonly >
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="name" class="layui-form-label">
+                        <!--<span class="x-red">*</span>-->合同名称
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="name" id="name"  autocomplete="off" class="layui-input" readonly>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="createName" class="layui-form-label">
+                        <!--<span class="x-red">*</span>-->创建人
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="createName" id="createName" autocomplete="off" class="layui-input" readonly >
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="createTime" class="layui-form-label">
+                        <!--<span class="x-red">*</span>-->创建时间
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="time" id="createTime"   autocomplete="off" class="layui-input " readonly>
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label for="customers" class="layui-form-label">
+                        <!--<span class="x-red">*</span>-->关联客户
+                    </label>
+                    <div class="layui-input-inline">
+
+                        <input type="text" name="customers" id="customers"   autocomplete="off" class="layui-input " readonly>
+
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="type" class="layui-form-label">
+                        <!--<span class="x-red">*</span>-->合同类型
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="type" id="type"   autocomplete="off" class="layui-input " readonly>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="money" class="layui-form-label">
+                        <!--<span class="x-red">*</span>-->合同总金额
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="money" id="money" autocomplete="off" class="layui-input" readonly>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="taxPoint" class="layui-form-label">
+                        <!--<span class="x-red">*</span>-->税点
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="taxPoint" id="taxPoint"  autocomplete="off" class="layui-input" readonly>
+                        <!--<div class="per">%</div>-->
+
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="taxMoney" class="layui-form-label">
+                        税费
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="taxMoney" id="taxMoney"   autocomplete="off" class="layui-input" readonly>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="first" class="layui-form-label">
+                        <!--<span class="x-red">*</span>-->首期付款比例
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text"  name="first" id="first"  autocomplete="off" class="layui-input" readonly>
+                        <!--<div class="per">%</div>-->
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="iniPaymoney" class="layui-form-label">
+                        首期付款金额
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="iniPaymoney" id="iniPaymoney"   autocomplete="off" class="layui-input" readonly>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="paytimeOne" class="layui-form-label">
+                        <!--<span class="x-red">*</span>-->回款时间
+                    </label>
+                    <div class="layui-input-inline ">
+                        <input type="text" name="time"  id="paytimeOne"  autocomplete="off" class="layui-input " readonly>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="second" class="layui-form-label">
+                        <!--<span class="x-red">*</span>-->二期付款比例
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="second" id="second"  autocomplete="off" class="layui-input"  readonly>
+                        <!--<div class="per">%</div>-->
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="secPaymoney" class="layui-form-label">
+                        二期付款金额
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="secPaymoney" id="secPaymoney"   autocomplete="off" class="layui-input" readonly>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="paytimeTwo" class="layui-form-label">
+                        <!--<span class="x-red">*</span>-->回款时间
+                    </label>
+                    <div class="layui-input-inline ">
+                        <input type="text" name="time" id="paytimeTwo"   autocomplete="off" class="layui-input " readonly>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="third" class="layui-form-label">
+                        <!--<span class="x-red">*</span>-->尾款付款比例
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="taxPoint" id="third" autocomplete="off" class="layui-input" readonly>
+                        <!--<div class="per">%</div>-->
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="thirdPaymoney" class="layui-form-label">
+                        尾款付款金额
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="thirdPaymoney" id="thirdPaymoney"   autocomplete="off" class="layui-input" readonly>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="paytimeThree" class="layui-form-label">
+                        <!--<span class="x-red">*</span>-->回款时间
+                    </label>
+                    <div class="layui-input-inline " >
+                        <input type="text"  name="time" id="paytimeThree"   autocomplete="off" class="layui-input " readonly>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="upload" class="layui-form-label">
+                        <!--<span class="x-red">*</span>-->合同附件
+                    </label>
+                    <div class="layui-input-inline" >
+                        <input type="text"  name="upload" id="upload"   autocomplete="off" class="layui-input " readonly>
+                    </div>
+                    <div class="layui-form-mid layui-word-aux">
+                        <a href="javascript:;" target="_blank" id="contract-url"><i class="layui-icon">&#xe615;</i>详情</a>
+                    </div>
+                </div>
+                <label  class="layui-form-label" style="font-size: large;font-weight: bold; margin-bottom: 10px;">
+                    开票信息
+                </label>
+                <div class="layui-form-item">
+                    <label for="invoice" class="layui-form-label">
+                        <!--<span class="x-red">*</span>-->发票抬头
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="invoice" id="invoice"  autocomplete="off" class="layui-input" readonly>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="taxNumber" class="layui-form-label">
+                        <!--<span class="x-red">*</span>-->税号
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="taxNumber" id="taxNumber" autocomplete="off" class="layui-input" readonly>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="address" class="layui-form-label">
+                        单位地址
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="address" id="address"  autocomplete="off" class="layui-input" readonly>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="phoneNumber" class="layui-form-label">
+                        电话号码
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="phoneNumber" id="phoneNumber"  autocomplete="off" class="layui-input" readonly>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="bank" class="layui-form-label">
+                        开户银行
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="bank" id="bank"  autocomplete="off" class="layui-input" >
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="account" class="layui-form-label">
+                        银行账户
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="account" id="account" autocomplete="off" class="layui-input" readonly>
+                    </div>
+                </div>
+                <div class="layui-col-md12" style="display: none;">
+                    <div class="layui-form-item">
+                        <label for="submit" class="layui-form-label">
+                        </label>
+                        <button class="layui-btn" id="submit" lay-filter="add" lay-submit>
+                            提交
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+        var app = {
+            Commonmethod: Commonmethod(),
+            baseurl: Commonmethod().baseUrl().baseurl,
+            treeObj:null,
+            init: function () {
+                var _this = this;
+
+                this.initForm();
+
+                this.event();
+
+            },
+
+            initForm:function() {
+                var _this = this;
+
+                _this.Commonmethod.ajax(
+                    _this.baseurl + '/api/oms/contract/info',
+                    {id:$("#id").val()},
+                    null,
+                    function (res) {
+                        //将回传的数据写入页面
+                        $("#number").val(res.data.number);
+                        $("#name").val(res.data.name);
+                        $("#createName").val(res.data.createName);
+                        $("#createTime").val(res.data.createTime);
+                        $("#customers").val(res.data.customers);
+                        $("#type").val(res.data.type);
+                        $("#money").val(res.data.money);
+
+                        $("#taxPoint").val(res.data.taxPoint*1 +'%');
+                        $("#taxMoney").val(res.data.tax);
+
+                        $("#first").val(res.data.first*1 +'%');
+                        $("#iniPaymoney").val(res.data.iniPaymoney*1);
+                        $("#paytimeOne").val(res.data.paytimeOne);
+
+                        $("#second").val(res.data.second*1 +'%');
+                        $("#secPaymoney").val(res.data.secPaymoney*1);
+                        $("#paytimeTwo").val(res.data.paytimeTwo);
+
+                        $("#third").val(res.data.third*1 +'%');
+                        $("#thirdPaymoney").val(res.data.thirdPaymoney*1);
+                        $("#paytimeThree").val(res.data.paytimeThree);
+
+                        // 合同附件以'/'分割，取最后一个
+                        var ourl = res.data.url;
+                        if (ourl != ''){
+                        $("#contract-url").attr('href',ourl).css('display','block');
+
+                        }
+                        url = ourl.split('/');
+                        url = url[url.length - 1];
+                        $("#upload").val(url);
+                        $("#invoice").val(res.data.invoice);
+                        $("#taxNumber").val(res.data.taxNumber);
+                        $("#address").val(res.data.address);
+                        //把手机号格式化成1XX-XXXX-XXXX显示
+                        $("#phoneNumber").val(res.data.phoneNumber.replace(/(\d{3})(\d{4})/,'$1-$2-'));
+                        $("#bank").val(res.data.bank);
+                        $("#number").val(res.data.number);
+                        $("#account").val(res.data.account);
+                        });
+                return false;
+            },
+            event:function(){
+                var _this = this;
+            },
+            child:function(id){
+                $("#id").val(id);
+            },
+        };
+
+    </script>
+</body>
+
+</html>

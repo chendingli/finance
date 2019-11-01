@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理系统</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv=“X-UA-Compatible” content=“chrome=1″ />
+    <link rel="shortcut icon" href="./images/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/common.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="./js/html5.min.js"></script>
+    <script type="text/javascript" src="./js/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+    <div class="x-nav">
+        <span class="layui-breadcrumb">
+            <a href="javascript:;">系统管理</a>
+            <a>
+                <cite>日志管理</cite>
+            </a>
+        </span>
+        <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" href="javascript:location.replace(location.href);" title="刷新">
+            <i class="layui-icon" style="line-height:30px">&#xe669;</i>
+        </a>
+    </div>
+    <div class="x-body">
+        <div class="layui-row">
+            <form class="layui-form layui-col-md12 x-so" action="javascript:;">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <div class="layui-input-inline">
+                            <input type="text" name="title" placeholder="请输入标题" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <div class="layui-input-inline">
+                            <input type="text" name="createBy" placeholder="请输入操作者" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <div class="layui-input-inline">
+                            <select name="type">
+                                <option value="">请选择日志类型</option>
+                                <option value="1">新增</option>
+                                <option value="2">修改</option>
+                                <option value="3">删除</option>
+                                <option value="4">查询</option>
+                                <option value="0">其它</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <div class="layui-input-inline">
+                            <input type="text" placeholder="请输入开始时间" name="beginDate" id="beginDate" class="layui-input" readonly>
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <div class="layui-input-inline">
+                            <input type="text" placeholder="请输入结束时间" name="endDate" id="endDate" class="layui-input" readonly>
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <div class="layui-input-inline">
+                            <a class="layui-btn search" data-type="reload"  id="search">
+                                <i class="layui-icon">&#xe615;</i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <!--<xblock>
+            <button class="layui-btn layui-btn-danger" id="add">
+                <i class="layui-icon">&#xe61f;</i>新增
+            </button>
+            <span class="x-right total" style="line-height:40px"></span>
+        </xblock>-->
+        <table id="list" lay-filter="list"></table>
+        <div id="page"></div>
+    </div>
+    <script type="text/html" id="operation">
+        <a title="详情" class="layui-btn layui-btn-xs" lay-event="view">详情</a>
+    </script>
+    <script>
+        var app = {
+            Commonmethod: Commonmethod(),
+            baseurl: Commonmethod().baseUrl().baseurl,
+            acceccToken: sessionStorage.getItem("accessToken"),
+            init: function () {
+                var _this = this;
+
+                _this.initForm();
+
+                // 初次查询
+                _this.initTable();
+
+                // 事件绑定
+                _this.event();
+            },
+
+            // 获取查询条件参数
+            getSearchParam:function(){
+                var _this = this;
+                var title = $("input[name='title']").val();
+                var createBy = $("input[name='createBy']").val();
+                var type = $("select[name='type']").val();
+                var beginDate = $("input[name='beginDate']").val();
+                var endDate = $("input[name='endDate']").val();
+                if(beginDate && endDate) {
+                    if(Date.parse(beginDate) > Date.parse(endDate)) {
+                        return "开始日期不能大于结束日期"
+                    }
+                }
+                var data = {
+                    'title':title,
+                    'type':type,
+                    'createBy':createBy,
+                    'beginDate':beginDate ,
+                    'endDate':endDate
+                };
+                return data;
+            },
+
+            // 初始化查询组件
+            initForm:function(){
+                layui.use('laydate', function(){
+                    var laydate = layui.laydate;
+                    laydate.render({
+                        elem: '#beginDate',
+                        type: 'datetime',
+                        format: 'yyyy-MM-dd HH:mm:ss'
+                    });
+
+                    laydate.render({
+                        elem: '#endDate',
+                        type: 'datetime',
+                        format: 'yyyy-MM-dd HH:mm:ss'
+                    });
+                })
+            },
+
+            // 初始化表格
+            initTable:function(){
+                var _this = this;
+
+                layui.use('table', function(){
+                    var table = layui.table;
+
+                    table.render({
+                        elem: '#list',
+                        url: _this.baseurl + '/api/oms/log/list',
+                        where: _this.getSearchParam(), //如果无需传递额外参数，可不加该参数
+                        headers:{"Authorization":_this.acceccToken},
+                        method: 'post', //如果无需自定义HTTP类型，可不加该参数
+                        request: { //用于对分页请求的参数：page、limit重新设定名称
+                            pageName: 'pageNum', //页码的参数名称，默认：page
+                            limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                        },
+                        response: { // 用于对返回的数据格式的自定义
+                            statusName: 'resultCode', //数据状态的字段名称，默认：code
+                            statusCode: 0, //成功的状态码，默认：0
+                            msgName: 'resultMsg', //状态信息的字段名称，默认：msg
+                            countName: 'count', //数据总数的字段名称，默认：count
+                            dataName: 'data' //数据列表的字段名称，默认：data
+                        },
+                        height: 540,
+                        cellMinWidth: 80,
+                        cols: [
+                            [{
+                                field: 'title',
+                                title: '标题'
+                            }, {
+                                field: 'type',
+                                title: '日志类型',
+                                templet: function(d) {
+                                    if(d.type == 1) {
+                                        return '新增';
+                                    } else if(d.type == 2){
+                                        return '修改'
+                                    } else if(d.type == 3){
+                                        return '删除'
+                                    } else if(d.type == 4){
+                                        return '查询'
+                                    } else {
+                                        return '其它'
+                                    }
+                                }
+                            }, {
+                                field: 'remoteAddr',
+                                title: '操作IP'
+                            },{
+                                field: 'createBy',
+                                title: '操作者'
+                            },{
+                                field: 'createTime',
+                                title: '操作时间',
+                                templet: function(d){
+                                    return _this.Commonmethod.formatTime(d.createTime);
+                                }
+                            }/*, {
+                                title: '操作',
+                                align: 'center',
+                                toolbar: '#operation'
+                            }*/]
+                        ],
+                        page: true
+                    });
+
+                    // 监听工具栏
+                    table.on('tool(list)', function (obj) { // list 为 table 的 lay-filter 属性
+
+                        var data = obj.data; //获得当前行数据
+                        var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+                        var tr = obj.tr; //获得当前行 tr 的DOM对象
+
+
+                        if (layEvent === 'view') { // 查看详情事件
+                            layeropen("修改用户",null,"account-edit","./account-edit.html",["确定","取消"],
+                                    {
+                                        yes:function(index){
+                                            // 确定按钮的回调
+                                            var iframe = window['layui-layer-iframe' + index];
+                                            iframe.app.submit(); // 触发提交
+                                        },
+                                        cancel:function(index){
+                                            // 取消按钮的回调
+                                            layer.close(index);
+                                        },
+                                        success:function(layero,index){
+                                            // 子窗口弹出前的回调
+
+                                            // 获取子页面的iframe
+                                            var iframe = window['layui-layer-iframe' + index];
+                                            // 向子页面的全局函数child传参
+                                            iframe.app.child(data.id);
+                                            iframe.app.init();
+                                        }
+                                    }
+                            );
+                        }
+                    });
+                });
+            },
+
+            // 事件绑定
+            event: function () {
+                var _this = this;
+
+                // 查询按钮绑定
+                $("#search").on('click',function() {
+                    var str = _this.getSearchParam();
+                    if((typeof str=='string')&&str.constructor==String) {
+                        layer.msg(str,{time:1000});
+                        return;
+                    }
+                    _this.initTable();
+                });
+
+            }
+        }
+
+        app.init();
+    </script>
+</body>
+
+</html>

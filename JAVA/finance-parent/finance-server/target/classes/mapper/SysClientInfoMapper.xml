@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chinasoft.mybatis.dao.SysClientInfoMapper">
+  <resultMap id="BaseResultMap" type="SysClientInfo">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="BIGINT" property="id"/>
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="phone" jdbcType="VARCHAR" property="phone" />
+    <result column="client_expense" jdbcType="DOUBLE" property="clientExpense" />
+    <result column="contract_money" jdbcType="DOUBLE" property="contractMoney" />
+    <result column="contract_number" jdbcType="INTEGER" property="contractNumber" />
+    <result column="create_name" jdbcType="VARCHAR" property="createName" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+
+  <select id="selectClientInfo" resultType="SysClientInfo">
+      SELECT
+      sc.id ,
+      sc.name,
+      sc.phone,
+      sc.create_name,
+      sc.create_time,
+      conex.*
+      FROM sys_client AS sc
+      LEFT JOIN
+      (select
+      cl.*,
+      ex.client_name,
+      ex.client_expense
+      from
+      (select
+      sum(con.money) AS contract_money,
+      con.associated_customers,
+      COUNT(con.associated_customers) AS contract_number
+      from
+      sys_contract as con
+      GROUP BY con.associated_customers) as cl
+      left JOIN
+      (select
+      client_name ,
+      sum(expense) AS client_expense
+      from sys_client_expense
+      GROUP BY client_name) as ex
+      on cl.associated_customers=ex.client_name) as conex
+      on sc.name = conex.associated_customers
+        <where>
+          <if test="clientInfo.getName()!=''">
+            sc.name LIKE CONCAT('%',#{clientInfo.name},'%')
+          </if>
+          <if test="clientInfo.getCreateName()!=''">
+            OR sc.create_name LIKE CONCAT('%',#{clientInfo.name},'%')
+          </if>
+          <if test="clientInfo.getName()!=''">
+            OR sc.phone LIKE CONCAT('%',#{clientInfo.name},'%')
+          </if>
+        </where>
+    ORDER BY
+    sc.id
+    DESC
+  </select>
+
+
+</mapper>

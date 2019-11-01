@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理系统</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv=“X-UA-Compatible” content=“chrome=1″ />
+    <link rel="shortcut icon" href="./images/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/common.js"></script>
+    <link rel="stylesheet" href="./lib/zTree_v3/css/zTreeStyle/zTreeStyle.css" type="text/css">
+    <script type="text/javascript" src="./lib/zTree_v3/js/jquery.ztree.core.js"></script>
+    <script type="text/javascript" src="./lib/zTree_v3/js/jquery.ztree.excheck.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="./js/html5.min.js"></script>
+    <script type="text/javascript" src="./js/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+    <div class="layui-container x-body">
+        <div class="layui-row">
+            <form class="layui-form" id="role-data">
+                <div class="layui-form-item">
+                    <label for="unmberId" class="layui-form-label">
+                        <span class="x-red"></span>员工编号
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="unmberId" name="unmberId" lay-verify="required|unmberId" autocomplete="off" class="layui-input" maxlength="20">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label  for="name" class="layui-form-label">
+                        <!-- <span class="x-red">*</span> -->员工姓名
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="name" name="name" lay-verify="required|name" lay-verify="description" autocomplete="off" class="layui-input" maxlength="20">
+                    </div>
+                </div>
+
+                <div class="layui-form-item" >
+                    <label class="layui-form-label">员工状态</label>
+                    <div class="layui-input-inline" >
+                        <select id="state" class="layui-form-label" name="state">
+                            <option value="请选择">请选择</option>
+                            <option selected value="在职">在职</option>
+                            <option value="离职">离职</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item" >
+                    <label class="layui-form-label">合同类型</label>
+                    <div class="layui-input-inline" >
+                        <select id="type" class="layui-form-label" name="type">
+                            <option value="请选择">请选择</option>
+                            <option selected value="TM（人力外包）">TM（人力外包）</option>
+                            <option value="FP（独立交付）">FP（独立交付）</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item" >
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">工资</label>
+
+                        <div class="layui-input-inline">
+                            <input type="text" id="sal" name="sal" lay-verify="required|sal" autocomplete="off" class="layui-input" maxlength="20">
+                        </div>
+                    </div>
+                    <!--<div class="layui-form-item" >-->
+                        <!--<label class="layui-form-label">入职时间</label>-->
+                        <!--&lt;!&ndash;  <input type="date" id="time" class="layui-form-label" style="width:120px" >&ndash;&gt;-->
+                        <!--<div class="layui-input-inline">-->
+                            <!--<input type="text" class="layui-input" id="rtime" name="rtime">-->
+                        <!--</div>-->
+                    <!--</div>-->
+
+                </div>
+                <div class="layui-col-md12" style="display: none;">
+                    <div class="layui-form-item">
+                        <label for="submit" class="layui-form-label">
+                        </label>
+                        <button class="layui-btn" id="submit" lay-filter="add" lay-submit>
+                            提交
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+
+        var mtime = function () {
+            layui.use('laydate', function(){
+                var laydate = layui.laydate;
+
+                //执行一个laydate实例
+                laydate.render({
+                    elem: '#rtime', //指定元素
+                    value:new Date(),
+                    isInitValue:true
+                });
+            });
+
+        };
+        mtime();
+        var app = {
+            Commonmethod: Commonmethod(),
+            baseurl: Commonmethod().baseUrl().baseurl,
+            treeObj:null,
+            form:null,
+            init: function () {
+                var _this = this;
+                this.initForm();
+                this.event();
+            },
+            initForm:function() {
+                var _this = this;
+                _this.Commonmethod.ajax(
+                    Commonmethod().baseUrl().baseurl + '/api/oms/personl/list',
+                    null,
+                    null,
+                    function (res) {
+                        if(res.data) {
+                            layui.use('form', function () {
+                                var form = layui.form;
+                                res.data.forEach(function(value){
+                                    $("#roleCheckBox").append('<input type="checkbox" lay-skin="primary" value="'+value.id+'" title="'+value.name+'">');
+                                });
+                                form.render();
+                            });
+                        }
+                    }
+                );
+            },
+            event:function(){
+                var _this = this;
+
+            },
+            submit:function() {
+
+                var _this = this;
+
+                // 设置选中的角色
+                // var roleIds = [];
+                // $.each($("input:checked"),function(index,item){
+                //     roleIds.push($(item).val());
+                // });
+                // $("#roleIds").val(roleIds.join(","));
+
+                // 绑定表单提交
+                layui.use('form', function () {
+                    var form = layui.form;
+                    _this.form = form;
+                    form.verify({
+                        unmberId: function (value) {
+                            var pattern = $.trim(value);
+                            if ((!value) || (pattern.length > 10)) {
+                                return '编号长度不可超过10';
+                            } else if (value.indexOf(' ') != -1) {
+                                return '不允许有空格，请修改';
+                            }
+                        },
+                        name: function (value) {
+                            var pattern = $.trim(value);
+                            if ((!value) || (pattern.length > 10)) {
+                                return '编号长度不可超过10';
+                            } else if (value.indexOf(' ') != -1) {
+                                return '不允许有空格，请修改';
+                            }
+                        },
+                        sal: function (value) {
+                            if(value.l <0){
+                                return '不能没有工资';
+                            }
+                        }
+
+                    });
+
+                    form.on('submit(add)', function (data) {
+                        // 提交表单
+                        _this.Commonmethod.ajax(
+                            Commonmethod().baseUrl().baseurl + '/api/oms/personl/add',
+                            data.field,
+                            null,
+                            function (res) {
+                                var index = parent.layer.getFrameIndex(window.name);
+                                layer.alert("新增成功",function(){
+                                    layer.close(index);
+                                    parent.location.reload();
+                                });
+                            }
+                        );
+                        return false;
+
+                    });
+                });
+                $('#submit').trigger('click'); // 触发表单提交
+            }
+        };
+    </script>
+</body>
+
+</html>

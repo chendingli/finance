@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理系统</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv=“X-UA-Compatible” content=“chrome=1″ />
+    <link rel="shortcut icon" href="./images/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/common.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="./js/html5.min.js"></script>
+    <script type="text/javascript" src="./js/respond.min.js"></script>
+    <![endif]-->
+</head>
+<style>
+  .layui-row .layui-form-item .layui-input-inline input{
+        border:none !important;
+        background-color: #EFEEF0 !important;
+    }
+</style>
+<body>
+<div class="x-body layui-container">
+    <div class="layui-row">
+        <form class="layui-form" id="account-data" action="javascript:;" style="position: relative;left: 50%;margin-left: -280px">
+            <input type="hidden" name="id" id="id">
+            <div class="layui-form-item">
+                <label for="clientName" class="layui-form-label">
+                    客户姓名
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" id="clientName"  name="clientName"  autocomplete="off" class="layui-input" maxlength="20" readonly >
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label for="createName" class="layui-form-label">
+                    创建人
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" name="createName" id="createName"  style="border: none" readonly autocomplete="off" class="layui-input" maxlength="20">
+                </div>
+            </div>
+            <div class="layui-form-item" id="addBehind">
+                <label for="type" class="layui-form-label">
+                    支出类型
+                </label>
+                <div class="layui-input-inline">
+                    <input type="hidden" id="type" name="type"  autocomplete="off" class="layui-input" maxlength="20" readonly >
+                    <input type="text" id="type1" name="type"  autocomplete="off" class="layui-input" maxlength="20" readonly >
+                </div>
+
+                <label for="expense" class="layui-form-label">
+                    支出总金额
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" name="expense" id="expense"   autocomplete="off" class="layui-input" maxlength="20" readonly >
+                </div>
+
+            </div>
+            <!--<div class="layui-form-item" id="addBehind">-->
+                <!--<label for="expense" class="layui-form-label">-->
+                    <!--支出金额-->
+                <!--</label>-->
+                <!--<div class="layui-input-inline">-->
+                    <!--<input type="text" name="expense" id="expense"   autocomplete="off" class="layui-input" maxlength="20" readonly >-->
+                <!--</div>-->
+            <!--</div>-->
+
+            <div class="layui-form-item" id="addBefore">
+                <label for="time" class="layui-form-label">
+                    时间
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" name="time"  id="time"  autocomplete="off" class="layui-input" maxlength="20" readonly >
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label for="details" class="layui-form-label">
+                    费用事由
+                </label>
+                <div class="layui-input-inline">
+                    <input type="text" name="details" id="details" autocomplete="off" class="layui-input" maxlength="20" readonly >
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!--<script>-->
+    <!--layui.use('laydate', function(){-->
+        <!--var laydate = layui.laydate;-->
+
+        <!--laydate.render({-->
+            <!--elem: '#time' //指定元素-->
+        <!--});-->
+    <!--});-->
+<!--</script>-->
+
+<script>
+    var app = {
+        Commonmethod: Commonmethod(),
+        baseurl: Commonmethod().baseUrl().baseurl,
+        treeObj:null,
+        form:null,
+        init: function () {
+            var _this = this;
+            this.initForm();
+            this.event();
+
+        },
+        initForm:function() {
+            var _this = this;
+
+            // 获取用户信息
+            _this.Commonmethod.ajax(
+                    Commonmethod().baseUrl().baseurl+'/api/oms/clientExpense/get',
+                    {id:$("#id").val()},
+                    null,
+                    function (res) {
+                        layui.use('form', function () {
+                            var form = layui.form;
+                            $("#id").val(res.data.id);
+                            $("#clientName").val(res.data.clientName);
+                            $("#createName").val(res.data.createName);
+                            $("#type").val(res.data.type);
+                            if($("#type").val()==0){
+                                $("#type1").val("沟通");
+                            }else if($("#type").val()==1){
+                                $("#type1").val("差旅");
+                            }else if($("#type").val()==2){
+                                $("#type1").val("礼物");
+                            }
+                            $("#expense").val(res.data.expense);
+                            var list = res.data.list;
+                            $.each(list,function (index,value) {
+                                var num = index+1;
+                                $("#addBefore").before(
+                                    '<div class="layui-form-item"> ' +
+                                        '<label class="layui-form-label">'+"支出途径"+'&nbsp;&nbsp;'+ num+'</label> ' +
+                                        '<div class="layui-input-inline"> ' +
+                                            '<input type="hidden"  id="way'+index+'"  value="'+value.wayType+'" autocomplete="off" class="layui-input" maxlength="20" readonly > ' +
+                                            '<input type="text"  id="ways'+index+'"  autocomplete="off" class="layui-input" maxlength="20" readonly > ' +
+                                        '</div> ' +
+                                            '<label class="layui-form-label">'+"支出金额"+' </label> ' +
+                                        '<div class="layui-input-inline"> ' +
+                                            '<input type="text" id="wayExpense'+index+'"  value="'+value.wayExpense+'"  autocomplete="off" class="layui-input" maxlength="20" readonly > ' +
+                                        '</div>'+
+                                    '</div>');
+                                _this.setName(index);
+
+                            });
+                            $("#time").val(res.data.time);
+                            $("#details").val(res.data.details);
+                            form.render();
+
+                        });
+                    }
+            );
+
+        },
+        event:function(){
+            var _this = this;
+
+        },
+        // 父窗口传参
+        setName:function(index){
+            var i = index;
+           // alert($("#way"+i).val())
+            if($("#way"+i).val()==0){
+                // alert($("#ways").val())
+                $("#ways"+i).val("送礼");
+            }else if($("#way"+i).val()==1){
+                $("#ways"+index).val("吃饭");
+            }else if($("#way"+i).val()==2){
+                $("#ways"+i).val("打车");
+            }
+        },
+        child:function(id){
+            $("#id").val(id);
+        },
+
+    };
+</script>
+</body>
+
+</html>

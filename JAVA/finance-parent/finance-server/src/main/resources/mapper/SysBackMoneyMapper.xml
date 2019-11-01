@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chinasoft.mybatis.dao.SysBackMoneyMapper">
+
+    <resultMap id="BaseResultMap" type="SysBackMoney">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="number" jdbcType="INTEGER" property="number" />
+        <result column="contract_no" jdbcType="INTEGER" property="contractNo" />
+        <result column="contract_name" jdbcType="VARCHAR" property="contractName" />
+        <result column="contract_type" jdbcType="VARCHAR" property="contractType" />
+        <result column="contract_money" jdbcType="DOUBLE" property="contractMoney" />
+        <result column="back_money" jdbcType="DOUBLE" property="backMoney" />
+        <result column="period" jdbcType="VARCHAR" property="period" />
+        <result column="estimate_time" jdbcType="TIMESTAMP" property="estimateTime" />
+        <result column="invoice_state" jdbcType="INTEGER" property="invoiceState" />
+        <result column="invoice_time" jdbcType="TIMESTAMP" property="invoiceTime" />
+        <result column="back_money_state" jdbcType="INTEGER" property="backMoneyState" />
+        <result column="back_money_time" jdbcType="TIMESTAMP" property="backMoneyTime" />
+        <result column="address" jdbcType="VARCHAR" property="address" />
+    </resultMap>
+
+    <select id="selectAllBackMoneyInfo" resultMap="BaseResultMap">
+        select a.*,b.name contract_name,b.type contract_type,b.money contract_money from sys_back_money a,
+        sys_contract b where a.contract_no = b.number
+        <if test="contractName!=null and contractName!=''">
+            and b.name like '%${contractName}%'
+        </if>
+        <if test="invoiceState!=null">
+            and a.invoice_state = #{invoiceState}
+        </if>
+        <if test="backMoneyState!=null">
+            and a.back_money_state = #{backMoneyState}
+        </if>
+          order by a.number desc
+    </select>
+
+    <select id="selectBackMoneyByNo" resultMap="BaseResultMap">
+        select a.*,b.name contract_name,b.type contract_type,b.money contract_money from sys_back_money a,
+        sys_contract b where a.contract_no = b.number and a.number = #{number}
+    </select>
+
+    <update id="updateBack">
+        update sys_back_money set back_money_state = 1,back_money_time = #{backMoneyTime}
+         where number = #{number}
+    </update>
+
+    <update id="updateInvoice">
+        update sys_back_money set address = #{address}, invoice_state = 1,
+         invoice_time = #{invoiceTime} where number = #{number}
+    </update>
+
+</mapper>
